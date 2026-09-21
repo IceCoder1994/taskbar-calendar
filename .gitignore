@@ -5,6 +5,7 @@ obj/
 # 发布产物（通过 GitHub Releases 分发）
 publish/
 dist/
+dist-lite/
 *.zip
 
 # IDE 配置

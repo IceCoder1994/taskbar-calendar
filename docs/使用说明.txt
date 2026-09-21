@@ -21,7 +21,8 @@ Q: 节假日数据会自动更新吗？
 A: 会。程序每天自动同步一次法定节假日与调休数据（静默执行）。
 
 【系统要求】
-Windows 11（64 位）。本版本为自包含版，无需安装 .NET 运行环境。
+Windows 11（64 位）+ .NET 8 桌面运行时。
+如果双击程序后提示缺少 .NET，按 Windows 引导安装即可（约 55MB，一次性）。
 
 【项目主页】
 https://github.com/IceCoder1994/taskbar-calendar

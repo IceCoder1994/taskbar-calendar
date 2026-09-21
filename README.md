@@ -24,12 +24,15 @@
 ## 下载安装
 
 1. 前往 [Releases](https://github.com/IceCoder1994/taskbar-calendar/releases) 页面
-2. 下载最新版 `TaskbarCalendar-vX.X.X-win-x64.zip`
+2. 下载最新版 `TaskbarCalendar-vX.X.X-lite-win-x64.zip`（约 1MB）
 3. 解压到任意文件夹（如 `D:\TaskbarCalendar`）
 4. 双击 `TaskbarCalendar.exe` 运行 —— 程序会驻留在系统托盘（蓝色日历图标）
 5. 点击右下角时钟，即可看到你的日历
 
-**系统要求**：Windows 11（64 位）。下载包为自包含版，无需安装 .NET 运行环境。
+**系统要求**：Windows 11（64 位）+ [.NET 8 桌面运行时](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+> **没有安装 .NET 运行时？** 不用手动找：双击程序后 Windows 会弹出官方提示，
+> 点击「是」自动跳转微软下载页安装（约 55MB，一次性，装完后所有 .NET 程序通用）。
 
 > **首次运行提示**：由于程序未做数字签名，Windows SmartScreen 可能提示「Windows 已保护你的电脑」。
 > 请点击「更多信息」→「仍要运行」。如杀毒软件误报，请将程序目录添加为信任。
