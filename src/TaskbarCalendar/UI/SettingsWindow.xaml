@@ -1,0 +1,125 @@
+﻿<Window x:Class="TaskbarCalendar.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="任务栏日历设置"
+        Width="440"
+        Height="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        ShowInTaskbar="True">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="18,16,18,18">
+            <TextBlock FontSize="15" FontWeight="SemiBold" Text="基本设置" Margin="0,0,0,10" />
+
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="周起始日" />
+                <ComboBox x:Name="WeekStartCombo" Grid.Column="1" SelectionChanged="OnSelectionChanged">
+                    <ComboBoxItem Content="周一" />
+                    <ComboBoxItem Content="周日" />
+                </ComboBox>
+            </Grid>
+
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="主题" />
+                <ComboBox x:Name="ThemeCombo" Grid.Column="1" SelectionChanged="OnSelectionChanged">
+                    <ComboBoxItem Content="跟随系统" />
+                    <ComboBoxItem Content="浅色" />
+                    <ComboBoxItem Content="深色" />
+                </ComboBox>
+            </Grid>
+
+            <CheckBox x:Name="AutoStartCheck"
+                      Content="开机自动启动"
+                      Margin="0,4,0,4"
+                      Checked="OnSettingChanged"
+                      Unchecked="OnSettingChanged" />
+
+            <CheckBox x:Name="ShowLunarCheck"
+                      Content="显示农历 / 节日 / 节气"
+                      Margin="0,4,0,4"
+                      Checked="OnSettingChanged"
+                      Unchecked="OnSettingChanged" />
+
+            <CheckBox x:Name="ShowHolidayMarkCheck"
+                      Content="显示法定节假日「休 / 班」标记"
+                      Margin="0,4,0,4"
+                      Checked="OnSettingChanged"
+                      Unchecked="OnSettingChanged" />
+
+            <TextBlock FontSize="15" FontWeight="SemiBold" Text="时钟区域校准" Margin="0,18,0,10" />
+
+            <TextBlock FontSize="12"
+                       Foreground="#666666"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,10"
+                       Text="当点击区域与任务栏时钟错位时，可在此微调覆盖层偏移（单位：像素，正数向右 / 向下）。修改后立即生效。" />
+
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="水平偏移 (X)" />
+                <TextBox x:Name="OffsetXBox" Grid.Column="1" LostFocus="OnOffsetChanged" />
+            </Grid>
+
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="垂直偏移 (Y)" />
+                <TextBox x:Name="OffsetYBox" Grid.Column="1" LostFocus="OnOffsetChanged" />
+            </Grid>
+
+            <TextBlock FontSize="15" FontWeight="SemiBold" Text="节假日数据" Margin="0,18,0,10" />
+
+            <TextBlock x:Name="HolidayVersionText"
+                       FontSize="12"
+                       Foreground="#666666"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,8" />
+
+            <CheckBox x:Name="AutoSyncCheck"
+                      Content="每天自动同步（静默执行，失败自动重试）"
+                      Margin="0,0,0,8"
+                      Checked="OnSettingChanged"
+                      Unchecked="OnSettingChanged" />
+
+            <Button x:Name="UpdateHolidayButton"
+                    Content="立即同步"
+                    Padding="12,6"
+                    HorizontalAlignment="Left"
+                    Click="OnUpdateHolidayClick" />
+
+            <TextBlock x:Name="UpdateStatusText"
+                       FontSize="12"
+                       Foreground="#666666"
+                       TextWrapping="Wrap"
+                       Margin="0,8,0,0" />
+
+            <TextBlock FontSize="15" FontWeight="SemiBold" Text="关于" Margin="0,18,0,10" />
+
+            <TextBlock x:Name="AboutText"
+                       FontSize="12"
+                       Foreground="#666666"
+                       TextWrapping="Wrap" />
+
+            <Button Content="关闭"
+                    Width="90"
+                    HorizontalAlignment="Right"
+                    Margin="0,18,0,0"
+                    IsCancel="True"
+                    Click="OnCloseClick" />
+        </StackPanel>
+    </ScrollViewer>
+</Window>
+

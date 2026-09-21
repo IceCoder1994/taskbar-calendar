@@ -1,0 +1,17 @@
+# 构建产物
+bin/
+obj/
+
+# 发布产物（通过 GitHub Releases 分发）
+publish/
+dist/
+
+# IDE 配置
+.vs/
+.idea/
+*.user
+*.suo
+
+# 系统文件
+Thumbs.db
+desktop.ini
