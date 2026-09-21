@@ -60,7 +60,31 @@
                        Foreground="#666666"
                        TextWrapping="Wrap"
                        Margin="0,0,0,10"
-                       Text="当点击区域与任务栏时钟错位时，可在此微调覆盖层偏移（单位：像素，正数向右 / 向下）。修改后立即生效。" />
+                       Text="当点击区域与任务栏时钟错位时，可在此微调覆盖层偏移（单位：像素，正数向右 / 向下）。修改后立即生效。若自动定位完全失效（系统结构变更等），可先做一次手动校准。" />
+
+            <TextBlock x:Name="ClockLocateStatusText"
+                       FontSize="12"
+                       Foreground="#666666"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,8" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <Button x:Name="CalibrateClockButton"
+                        Content="校准时钟位置（5 秒取点）"
+                        Padding="12,6"
+                        Click="OnCalibrateClockClick" />
+                <Button x:Name="ClearCalibrationButton"
+                        Content="清除校准"
+                        Padding="12,6"
+                        Margin="10,0,0,0"
+                        Click="OnClearCalibrationClick" />
+            </StackPanel>
+
+            <CheckBox x:Name="ForceManualClockCheck"
+                      Content="始终使用手动校准位置（忽略自动定位）"
+                      Margin="0,0,0,10"
+                      Checked="OnSettingChanged"
+                      Unchecked="OnSettingChanged" />
 
             <Grid Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>

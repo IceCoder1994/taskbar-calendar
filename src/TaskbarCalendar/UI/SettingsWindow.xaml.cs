@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TaskbarCalendar.Calendar;
+using TaskbarCalendar.Interop;
 using TaskbarCalendar.Services;
 
 // WinForms 全局 using 与 WPF 同名类型消歧
@@ -17,6 +19,8 @@ public partial class SettingsWindow : Window
     private readonly HolidayService _holidayService = new();
 
     private bool _loading;
+    private DispatcherTimer? _calibrateTimer;
+    private int _calibrateCountdown;
 
     public SettingsWindow()
     {
@@ -42,6 +46,7 @@ public partial class SettingsWindow : Window
         ShowLunarCheck.IsChecked = settings.ShowLunar;
         ShowHolidayMarkCheck.IsChecked = settings.ShowHolidayMark;
         AutoSyncCheck.IsChecked = settings.AutoSyncHolidays;
+        ForceManualClockCheck.IsChecked = settings.ForceManualClockRect;
         OffsetXBox.Text = settings.OffsetX.ToString();
         OffsetYBox.Text = settings.OffsetY.ToString();
 
@@ -51,6 +56,7 @@ public partial class SettingsWindow : Window
             $"日志目录：{AppPaths.LogDirectory}";
 
         UpdateHolidayVersionText();
+        UpdateClockLocateStatus();
         _loading = false;
     }
 
@@ -119,6 +125,7 @@ public partial class SettingsWindow : Window
         settings.ShowLunar = ShowLunarCheck.IsChecked == true;
         settings.ShowHolidayMark = ShowHolidayMarkCheck.IsChecked == true;
         settings.AutoSyncHolidays = AutoSyncCheck.IsChecked == true;
+        settings.ForceManualClockRect = ForceManualClockCheck.IsChecked == true;
 
         if (int.TryParse(OffsetXBox.Text, out int offsetX))
         {
@@ -147,6 +154,84 @@ public partial class SettingsWindow : Window
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e) => ApplyFromUi();
 
     private void OnOffsetChanged(object sender, RoutedEventArgs e) => ApplyFromUi();
+
+    /// <summary>开始校准时钟位置：给用户 5 秒把鼠标移到时钟上，随后记录鼠标所在点</summary>
+    private void OnCalibrateClockClick(object sender, RoutedEventArgs e)
+    {
+        if (_calibrateTimer is not null)
+        {
+            return;
+        }
+
+        _calibrateCountdown = 5;
+        CalibrateClockButton.IsEnabled = false;
+        ClockLocateStatusText.Text = $"请在 {_calibrateCountdown} 秒内把鼠标移到任务栏时钟上停住…";
+
+        _calibrateTimer = new DispatcherTimer(
+            TimeSpan.FromSeconds(1),
+            DispatcherPriority.Normal,
+            OnCalibrateTick,
+            Dispatcher);
+        _calibrateTimer.Start();
+    }
+
+    private void OnCalibrateTick(object? sender, EventArgs e)
+    {
+        _calibrateCountdown--;
+        if (_calibrateCountdown > 0)
+        {
+            ClockLocateStatusText.Text = $"请在 {_calibrateCountdown} 秒内把鼠标移到任务栏时钟上停住…";
+            return;
+        }
+
+        _calibrateTimer?.Stop();
+        _calibrateTimer = null;
+        CalibrateClockButton.IsEnabled = true;
+
+        if (!NativeMethods.GetCursorPos(out NativeMethods.POINT point))
+        {
+            ClockLocateStatusText.Text = "校准失败：无法获取鼠标位置，请重试。";
+            return;
+        }
+
+        AppSettings settings = SettingsService.Instance.Current;
+        settings.HasManualClockRect = true;
+        settings.ManualClockRectX = point.X;
+        settings.ManualClockRectY = point.Y;
+        SettingsService.Instance.Save();
+
+        Logger.Info($"手动校准时钟位置完成：中心 ({point.X},{point.Y})");
+        UpdateClockLocateStatus();
+    }
+
+    /// <summary>清除手动校准位置</summary>
+    private void OnClearCalibrationClick(object sender, RoutedEventArgs e)
+    {
+        AppSettings settings = SettingsService.Instance.Current;
+        settings.HasManualClockRect = false;
+        SettingsService.Instance.Save();
+        UpdateClockLocateStatus();
+        Logger.Info("已清除手动时钟位置校准");
+    }
+
+    /// <summary>刷新时钟定位状态显示</summary>
+    private void UpdateClockLocateStatus()
+    {
+        AppSettings settings = SettingsService.Instance.Current;
+        if (settings.HasManualClockRect)
+        {
+            ClearCalibrationButton.IsEnabled = true;
+            ClockLocateStatusText.Text =
+                $"已校准手动位置：中心点 ({settings.ManualClockRectX},{settings.ManualClockRectY})，" +
+                $"区域 {settings.ManualClockRectWidth}×{settings.ManualClockRectHeight}。" +
+                "自动定位不可用时会自动使用该位置；如与时钟有偏差，可重新校准或用下方偏移微调。";
+        }
+        else
+        {
+            ClearCalibrationButton.IsEnabled = false;
+            ClockLocateStatusText.Text = "未校准手动位置（当前完全依赖自动定位）。";
+        }
+    }
 
     private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
 }

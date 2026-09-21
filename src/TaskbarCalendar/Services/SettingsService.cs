@@ -48,6 +48,24 @@ public sealed class AppSettings
 
     /// <summary>时钟区域垂直偏移校准（像素）</summary>
     public int OffsetY { get; set; }
+
+    /// <summary>是否已完成手动时钟位置校准（自动定位失败时的兜底）</summary>
+    public bool HasManualClockRect { get; set; }
+
+    /// <summary>是否始终使用手动校准位置（忽略自动定位）</summary>
+    public bool ForceManualClockRect { get; set; }
+
+    /// <summary>手动校准区域的中心 X（物理像素）</summary>
+    public int ManualClockRectX { get; set; }
+
+    /// <summary>手动校准区域的中心 Y（物理像素）</summary>
+    public int ManualClockRectY { get; set; }
+
+    /// <summary>手动校准区域宽度（物理像素）</summary>
+    public int ManualClockRectWidth { get; set; } = 94;
+
+    /// <summary>手动校准区域高度（物理像素）</summary>
+    public int ManualClockRectHeight { get; set; } = 48;
 }
 
 /// <summary>

@@ -55,7 +55,7 @@ src/TaskbarCalendar/
 
 ## 核心链路（改动前务必理解）
 
-1. `ClockLocator` 后台线程每秒用 UIA 读取任务栏时钟按钮矩形（`SystemTray.OmniButtonLeft`），变化才发事件；
+1. `ClockLocator` 后台线程每秒用 UIA 读取任务栏时钟按钮矩形（多级兜底：类名候选 + 名称/位置特征 + 类名兜底，失败回退手动校准位置），变化才发事件；
 2. `App` 应用设置中的偏移校准后交给 `ClickOverlay`，同时用 1 秒定时器反复置顶（防 explorer 重排 z-order）；
 3. 用户点击 → 覆盖层收到 `WM_LBUTTONUP` → `ToggleCalendar()` 弹出/收起 `CalendarPopupWindow`；
 4. 面板定位：时钟上方右对齐，物理像素计算（`SetWindowPos`），并 clamp 到工作区。
@@ -91,6 +91,7 @@ src/TaskbarCalendar/
 8. **发布被文件锁定**：本地覆盖 `publish\` 前必须退出正在运行的实例（`Get-Process TaskbarCalendar` 确认）；CI（Actions）不受影响；
 9. **单实例 Mutex** 为 `Global\TaskbarCalendar.SingleInstance`：自动化测试启动新实例前先杀掉旧实例，否则弹"已在运行"对话框阻塞脚本；
 10. **节气算法**为寿星公式（21 世纪），个别年份可能 ±1 天；发现偏差需查证后修正 `LunarService.SolarTermConstants` 或加例外表。
+11. **任务栏时钟类名随系统版本变化**（24H2 = `SystemTray.OmniButtonLeft`、25H2 = `SystemTray.OmniButton`，且类名可能被多个按钮共用）：通用兜底是"名称含时间/日期特征 + 最靠右位置"（与类名、语言无关），类名匹配必须逐候选校验名称；适配新系统时更新 `ClockClassNames`，并利用用户日志中的"任务栏结构诊断快照"定位问题；无法自动适配时可引导用户使用设置中的手动校准（5 秒取点）。
 
 ## 测试方式（无单元测试）
 

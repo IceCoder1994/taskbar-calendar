@@ -11,7 +11,7 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AssemblyTitle>任务栏日历</AssemblyTitle>
     <Product>任务栏日历插件</Product>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <!-- DPI 由 app.manifest 统一声明，压制 WinForms 分析器建议 -->
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
