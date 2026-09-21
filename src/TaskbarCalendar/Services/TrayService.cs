@@ -16,6 +16,7 @@ public sealed class TrayService : IDisposable
     private NotifyIcon? _notifyIcon;
     private ContextMenuStrip? _menu;
     private ToolStripMenuItem? _autoStartItem;
+    private Icon? _trayIcon;
 
     /// <summary>请求打开日历面板</summary>
     public event EventHandler? OpenCalendarRequested;
@@ -90,15 +91,35 @@ public sealed class TrayService : IDisposable
         _notifyIcon?.ShowBalloonTip(5000, title, text, ToolTipIcon.Info);
     }
 
-    /// <summary>加载应用图标，失败时退回系统默认图标</summary>
-    private static Icon LoadAppIcon()
+    /// <summary>加载应用图标：优先从 exe 嵌入图标提取，失败退回系统默认图标</summary>
+    private Icon LoadAppIcon()
     {
+        try
+        {
+            // 单文件发布时没有外部 Assets 目录，直接提取 exe 嵌入的应用程序图标
+            string? exePath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exePath))
+            {
+                Icon? extracted = Icon.ExtractAssociatedIcon(exePath);
+                if (extracted is not null)
+                {
+                    _trayIcon = extracted;
+                    return extracted;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("从可执行文件提取图标失败", ex);
+        }
+
         try
         {
             string path = Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
             if (File.Exists(path))
             {
-                return new Icon(path, new Size(32, 32));
+                _trayIcon = new Icon(path, new Size(32, 32));
+                return _trayIcon;
             }
         }
         catch (Exception ex)
@@ -106,7 +127,8 @@ public sealed class TrayService : IDisposable
             Logger.Error("加载应用图标失败", ex);
         }
 
-        return SystemIcons.Application;
+        _trayIcon = SystemIcons.Application;
+        return _trayIcon;
     }
 
     private void ToggleAutoStart()
@@ -166,5 +188,13 @@ public sealed class TrayService : IDisposable
 
         _menu?.Dispose();
         _menu = null;
+
+        // SystemIcons.Application 为共享资源，无需释放
+        if (_trayIcon is not null && !ReferenceEquals(_trayIcon, SystemIcons.Application))
+        {
+            _trayIcon.Dispose();
+        }
+
+        _trayIcon = null;
     }
 }

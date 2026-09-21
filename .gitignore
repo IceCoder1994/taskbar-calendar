@@ -5,6 +5,7 @@ obj/
 # 发布产物（通过 GitHub Releases 分发）
 publish/
 dist/
+*.zip
 
 # IDE 配置
 .vs/
