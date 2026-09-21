@@ -82,6 +82,10 @@ powershell -ExecutionPolicy Bypass -File tools\publish.ps1    # 发布轻量版
 
 也可以运行 `TaskbarCalendar.exe --settings` 直接打开设置窗口。
 
+## 贡献
+
+欢迎提交 Issue 与 Pull Request！协作流程（Fork + PR）见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
 ## 许可证
 
 [MIT](LICENSE)
