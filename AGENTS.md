@@ -10,6 +10,7 @@
 | 技术栈 | C# / .NET 8 / WPF（`net8.0-windows`），零第三方 NuGet 依赖 |
 | 发布形态 | 轻量版（框架依赖 .NET 8 Desktop Runtime），约 130KB zip |
 | 仓库 | https://github.com/IceCoder1994/taskbar-calendar（MIT） |
+| 官网 | https://calendar.icewang.qzz.io/（`site/` 纯静态单页，Cloudflare Pages 托管，免备案） |
 | 文档 | `docs/功能清单.md`（需求与变更记录）、`docs/使用说明.txt`、`README.md` |
 
 ## 常用命令
@@ -20,6 +21,8 @@ dotnet run --project src\TaskbarCalendar                  # 运行（托盘驻�
 dotnet run --project src\TaskbarCalendar -- --settings    # 直接打开设置窗口
 powershell -ExecutionPolicy Bypass -File tools\publish.ps1      # 发布轻量版到 publish\
 powershell -ExecutionPolicy Bypass -File tools\generate-icon.ps1 # 重新生成 app.ico
+powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1     # 同步官网下载包 + 页面版本号
+powershell -ExecutionPolicy Bypass -File tools\generate-og-image.ps1 # 重新生成 OG 分享卡片
 ```
 
 | 运行时文件 | 位置 |
@@ -51,6 +54,14 @@ src/TaskbarCalendar/
 └─ Calendar/
    ├─ LunarService.cs       # 农历/节气/传统节日/干支（ChineseLunisolarCalendar）
    └─ HolidayService.cs     # 节假日数据：本地 JSON + timor.tech 在线同步 + lastSync
+
+site/                       # 官网静态单页（Cloudflare Pages 构建输出目录，无构建步骤）
+├─ index.html               #   首页：下载入口 / 安装引导 / FAQ
+├─ 404.html                 #   自定义错误页
+├─ robots.txt、sitemap.xml  #   SEO 文件
+├─ _headers                 #   Cloudflare Pages 缓存策略
+├─ css/、js/、assets/       #   样式 / 脚本 / 图片（favicon、OG 卡片、界面截图）
+└─ download/                #   官网直链下载包（由 tools\sync-site.ps1 生成）
 ```
 
 ## 核心链路（改动前务必理解）
@@ -92,6 +103,9 @@ src/TaskbarCalendar/
 9. **单实例 Mutex** 为 `Global\TaskbarCalendar.SingleInstance`：自动化测试启动新实例前先杀掉旧实例，否则弹"已在运行"对话框阻塞脚本；
 10. **节气算法**为寿星公式（21 世纪），个别年份可能 ±1 天；发现偏差需查证后修正 `LunarService.SolarTermConstants` 或加例外表。
 11. **任务栏时钟类名随系统版本变化**（24H2 = `SystemTray.OmniButtonLeft`、25H2 = `SystemTray.OmniButton`，且类名可能被多个按钮共用）：通用兜底是"名称含时间/日期特征 + 最靠右位置"（与类名、语言无关），类名匹配必须逐候选校验名称；适配新系统时更新 `ClockClassNames`，并利用用户日志中的"任务栏结构诊断快照"定位问题；无法自动适配时可引导用户使用设置中的手动校准（5 秒取点）。
+12. **官网（`site/`）发版必须同步**：`site/download/` 内的 zip 与 `index.html` / `404.html` 中的版本号不会自动更新，发版前必须运行 `tools\sync-site.ps1`，否则官网下载到的仍是旧版本；`tools\sync-site.ps1` 与 `tools\generate-og-image.ps1` 均为含中文的 UTF-8 with BOM 脚本（见陷阱 1）。
+13. **官网下载包依赖 .gitignore 例外**：根 `.gitignore` 有 `*.zip` 规则，`site/download/` 通过 `!site/download/*.zip` 例外交付；新增站点二进制资源时注意同样处理。
+14. **Cloudflare 上 `*.pages.dev` 共享域在国内不稳定**：对外一律使用自定义域 `calendar.icewang.qzz.io`；页面内资源用相对路径（`assets/...`），404 页用绝对路径（`/assets/...`）以兼容任意深度路径。
 
 ## 测试方式（无单元测试）
 
@@ -109,11 +123,13 @@ src/TaskbarCalendar/
 # 1. 改版本号与变更记录
 #    src\TaskbarCalendar\TaskbarCalendar.csproj 的 <Version>
 #    docs\功能清单.md 变更记录追加一行
-# 2. 提交推送
+# 2. 同步官网站点（下载包 + 页面版本号 + sitemap 日期）
+powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1
+# 3. 提交推送（site/ 改动推送后由 Cloudflare Pages 自动部署）
 git add -A; git commit -m "feat: ..."; git push
-# 3. 打标签触发自动发版（GitHub Actions: .github/workflows/release.yml）
+# 4. 打标签触发自动发版（GitHub Actions: .github/workflows/release.yml）
 git tag v1.0.2; git push origin v1.0.2
-# 4. 验证（3-5 分钟后）
+# 5. 验证（3-5 分钟后）
 gh release view v1.0.2
 ```
 

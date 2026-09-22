@@ -1,0 +1,23 @@
+# Cloudflare Pages 响应头配置
+# 语法：URL 模式 + 缩进的头部行；同模式多条规则会合并
+
+# 下载包文件名带版本号，可安全长期强缓存
+/download/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 静态资源（图片更新频率低但文件名固定，缓存 7 天）
+/assets/*
+  Cache-Control: public, max-age=604800
+
+/css/*
+  Cache-Control: public, max-age=604800
+
+/js/*
+  Cache-Control: public, max-age=604800
+
+# HTML 始终回源校验，保证发版后立即生效
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate

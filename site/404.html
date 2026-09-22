@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>页面走丢了 · 任务栏日历</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .err-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .err-code {
+      font-size: 6rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .err-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 20px 0 10px;
+    }
+    .err-desc {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 460px;
+    }
+    .err-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <main class="err-wrap">
+    <div class="err-code">404</div>
+    <h1 class="err-title">这个日期不在日历里</h1>
+    <p class="err-desc">你访问的页面走丢了。不过没关系，回到首页继续使用即可。</p>
+    <div class="err-actions">
+      <a href="/" class="btn btn-primary">返回首页</a>
+      <a href="/download/TaskbarCalendar-v1.0.2-lite-win-x64.zip" class="btn btn-secondary" download>直接下载 v1.0.2（132 KB）</a>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('theme'); } catch (e) { }
+      if (saved) {
+        document.body.setAttribute('data-theme', saved);
+      } else if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</body>
+</html>

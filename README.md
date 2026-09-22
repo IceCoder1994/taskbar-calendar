@@ -2,6 +2,8 @@
 
 点击 Windows 11 任务栏右下角时钟，弹出**自己的日历** —— 替代系统原生日历弹窗。
 
+**官网（国内可直连下载）：<https://calendar.icewang.qzz.io/>**
+
 > 原生时钟显示不受影响；点击铃铛的通知中心也照常可用。
 
 ![日历面板（深色）](docs/images/calendar-dark.png)
@@ -23,8 +25,12 @@
 
 ## 下载安装
 
+**方式一（推荐，国内直连）**：打开官网 <https://calendar.icewang.qzz.io/>，点击「立即下载」。
+
+**方式二（GitHub）**：
+
 1. 前往 [Releases](https://github.com/IceCoder1994/taskbar-calendar/releases) 页面
-2. 下载最新版 `TaskbarCalendar-vX.X.X-lite-win-x64.zip`（约 1MB）
+2. 下载最新版 `TaskbarCalendar-vX.X.X-lite-win-x64.zip`（约 140 KB）
 3. 解压到任意文件夹（如 `D:\TaskbarCalendar`）
 4. 双击 `TaskbarCalendar.exe` 运行 —— 程序会驻留在系统托盘（蓝色日历图标）
 5. 点击右下角时钟，即可看到你的日历
@@ -81,6 +87,9 @@ powershell -ExecutionPolicy Bypass -File tools\publish.ps1    # 发布轻量版
 ```
 
 也可以运行 `TaskbarCalendar.exe --settings` 直接打开设置窗口。
+
+官网源码位于 `site/`（纯静态单页，由 Cloudflare Pages 托管，构建输出目录填 `site`）；
+发版前执行 `powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1` 可自动同步站点下载包与页面版本号。
 
 ## 贡献
 
