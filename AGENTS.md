@@ -107,6 +107,7 @@ site/                       # 官网静态单页（Cloudflare Pages 构建输出
 12. **官网（`site/`）发版必须同步**：`site/download/` 内的 zip 与 `index.html` / `404.html` 中的版本号不会自动更新，发版前必须运行 `tools\sync-site.ps1`，否则官网下载到的仍是旧版本；`tools\sync-site.ps1` 与 `tools\generate-og-image.ps1` 均为含中文的 UTF-8 with BOM 脚本（见陷阱 1）。
 13. **官网下载包依赖 .gitignore 例外**：根 `.gitignore` 有 `*.zip` 规则，`site/download/` 通过 `!site/download/*.zip` 例外交付；新增站点二进制资源时注意同样处理。
 14. **Cloudflare 上 `*.pages.dev` 共享域在国内不稳定**：对外一律使用自定义域 `calendar.icewang.qzz.io`；页面内资源用相对路径（`assets/...`），404 页用绝对路径（`/assets/...`）以兼容任意深度路径。
+15. **演示 GIF 录制有隐式依赖**：`tools\record-demo.ps1` 会强制重启 `D:\TaskbarCalendar\TaskbarCalendar.exe`（可用 `-ExePath` 覆盖）并真实控制鼠标约 7 秒；面板内元素坐标基于 360×460 面板与 UIA 实测（`record_demo.py` 顶部注释），时钟坐标依赖日志格式 `时钟位置更新: (左,上)-(右,下)`；改动面板布局、尺寸或日志格式后需同步更新脚本，否则会点到错误位置。
 
 ## 测试方式（无单元测试）
 
