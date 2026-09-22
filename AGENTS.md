@@ -23,6 +23,7 @@ powershell -ExecutionPolicy Bypass -File tools\publish.ps1      # 发布轻量�
 powershell -ExecutionPolicy Bypass -File tools\generate-icon.ps1 # 重新生成 app.ico
 powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1     # 同步官网下载包 + 页面版本号
 powershell -ExecutionPolicy Bypass -File tools\generate-og-image.ps1 # 重新生成 OG 分享卡片
+powershell -ExecutionPolicy Bypass -File tools\record-demo.ps1   # 录制官网演示 GIF（默认调用 D:\TaskbarCalendar 下的程序）
 ```
 
 | 运行时文件 | 位置 |

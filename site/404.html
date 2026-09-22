@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +46,7 @@
     }
   </style>
 </head>
-<body data-theme="dark">
+<body>
   <main class="err-wrap">
     <div class="err-code">404</div>
     <h1 class="err-title">这个日期不在日历里</h1>
@@ -61,9 +61,9 @@
       var saved = null;
       try { saved = localStorage.getItem('theme'); } catch (e) { }
       if (saved) {
-        document.body.setAttribute('data-theme', saved);
+        document.documentElement.setAttribute('data-theme', saved);
       } else if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.setAttribute('data-theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'light');
       }
     })();
   </script>

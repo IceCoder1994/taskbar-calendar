@@ -6,7 +6,7 @@
 
 > 原生时钟显示不受影响；点击铃铛的通知中心也照常可用。
 
-![日历面板（深色）](docs/images/calendar-dark.png)
+![任务栏日历交互演示](site/assets/demo-dark.gif)
 
 ## 功能特性
 

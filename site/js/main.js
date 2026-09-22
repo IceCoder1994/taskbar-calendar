@@ -11,26 +11,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 初始化主题（优先 localStorage，其次系统偏好）
   if (savedTheme) {
-    document.body.setAttribute('data-theme', savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
   } else if (prefersDarkScheme.matches) {
-    document.body.setAttribute('data-theme', 'dark');
+    document.documentElement.setAttribute('data-theme', 'dark');
   } else {
-    document.body.setAttribute('data-theme', 'light');
+    document.documentElement.setAttribute('data-theme', 'light');
   }
 
   // 监听系统主题变化
   prefersDarkScheme.addEventListener('change', (e) => {
     if (!localStorage.getItem('theme')) {
-      document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
     }
   });
 
   // 主题按钮点击切换
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
-      const currentTheme = document.body.getAttribute('data-theme');
+      const currentTheme = document.documentElement.getAttribute('data-theme');
       const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme);
       localStorage.setItem('theme', nextTheme);
     });
   }

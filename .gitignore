@@ -18,3 +18,7 @@ dist-lite/
 # 系统文件
 Thumbs.db
 desktop.ini
+
+# Python 缓存（tools 下的辅助脚本）
+__pycache__/
+*.pyc
