@@ -7,6 +7,7 @@ publish/
 dist/
 dist-lite/
 *.zip
+!site/download/*.zip
 
 # IDE 配置
 .vs/

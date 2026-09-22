@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任务栏日历 (Taskbar Calendar) - Windows 11 农历与法定调休时钟增强神器</title>
+  <meta name="description" content="点击 Windows 11 任务栏右下角时钟，弹出拥有农历、二十四节气、法定休班标记的专属日历。纯 Win32 零侵入覆盖，完全开源轻量，内存占用极低。">
+  <meta name="keywords" content="Windows11日历, 任务栏日历, Win11农历, 节假日调休, WPF日历, 开源桌面小工具">
+  <meta name="author" content="IceCoder">
+  <link rel="canonical" href="https://calendar.icewang.qzz.io/">
+
+  <!-- Open Graph 社交卡片 -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://calendar.icewang.qzz.io/">
+  <meta property="og:title" content="任务栏日历 - 让 Win11 任务栏时钟拥有属于你的农历与调休">
+  <meta property="og:description" content="点击时钟弹出农历、节气与休班安排。原生外观零修改，通知中心照常可用。">
+  <meta property="og:image" content="https://calendar.icewang.qzz.io/assets/calendar-dark.png">
+
+  <!-- 网页图标 -->
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="dark">
+  <!-- 顶部导航栏 -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-brand">
+        <img src="assets/favicon.ico" alt="应用图标" class="brand-icon">
+        <span class="brand-name">任务栏日历</span>
+        <span class="badge-version">v1.0.2</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features">功能特性</a>
+        <a href="#install">安装运行</a>
+        <a href="#faq">常见问题</a>
+        <a href="https://github.com/IceCoder1994/taskbar-calendar" target="_blank" rel="noopener noreferrer" class="nav-link-icon" title="GitHub 仓库">
+          <svg class="icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <button id="theme-toggle" class="btn-theme" title="切换深浅外观" aria-label="切换色彩主题">
+          <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero 首屏区域 -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-text">
+        <div class="tagline">
+          <span class="pulse-dot"></span> Windows 11 原生时钟无感替换
+        </div>
+        <h1 class="hero-title">
+          让任务栏时钟，拥有属于你的<br>
+          <span class="gradient-text">农历与法定调休</span>
+        </h1>
+        <p class="hero-subtitle">
+          点击任务栏右下角时钟，弹出自研精美月历。自带农历、二十四节气与国务院法定节假日「休/班」角标；不破坏原生时钟外观，不影响通知中心，极致轻量无负担。
+        </p>
+
+        <div class="hero-actions">
+          <a href="download/TaskbarCalendar-v1.0.2-lite-win-x64.zip" class="btn btn-primary btn-download" download>
+            <svg class="btn-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span class="btn-content">
+              <strong>立即下载 v1.0.2</strong>
+              <small>轻量绿色版 · 仅 132 KB</small>
+            </span>
+          </a>
+
+          <a href="https://github.com/IceCoder1994/taskbar-calendar" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
+            </svg>
+            <span>GitHub 源码</span>
+          </a>
+        </div>
+
+        <div class="system-req">
+          <span>要求：Windows 11 (x64)</span>
+          <span class="dot-divider">•</span>
+          <span>需 .NET 8 桌面运行时</span>
+          <span class="dot-divider">•</span>
+          <span>零捆绑 / 免安装 / 解压即用</span>
+        </div>
+      </div>
+
+      <div class="hero-preview">
+        <div class="preview-container">
+          <div class="preview-tabs">
+            <button class="preview-tab active" data-img="calendar-dark.png">深色主题</button>
+            <button class="preview-tab" data-img="calendar-light.png">浅色主题</button>
+            <button class="preview-tab" data-img="settings.png">个性化设置</button>
+          </div>
+          <div class="preview-image-wrapper">
+            <img id="preview-img" src="assets/calendar-dark.png" alt="日历主面板预览" class="preview-img shadow-float">
+          </div>
+          <div class="preview-caption">
+            <span>✨ 点击时钟平滑弹出 · Esc / 点击外部自动收起</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 核心对比条 -->
+  <section class="compare-section">
+    <div class="section-container">
+      <div class="compare-grid">
+        <div class="compare-card bad">
+          <div class="card-badge">Win 11 原生日历</div>
+          <ul class="compare-list">
+            <li>❌ 24H2 起日历默认折叠在通知底部，查阅繁琐</li>
+            <li>❌ 无传统农历日与初一月名展示</li>
+            <li>❌ 无二十四节气标识与民俗节日</li>
+            <li>❌ 无国务院调休「休」「班」提示</li>
+          </ul>
+        </div>
+        <div class="compare-card good">
+          <div class="card-badge highlight">任务栏日历 (Taskbar Calendar)</div>
+          <ul class="compare-list">
+            <li>✅ 点击任务栏时钟直达独立日历面板，不弹通知抽屉</li>
+            <li>✅ 精准农历干支历法、二十四节气与传统节日全收录</li>
+            <li>✅ 每日自动静默同步国务院节假日，调休排班一目了然</li>
+            <li>✅ 纯 Win32 透明覆盖，原生时钟与通知铃铛功能零破坏</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 核心功能网格 -->
+  <section id="features" class="features-section">
+    <div class="section-container">
+      <div class="section-header text-center">
+        <h2 class="section-title">精致实用，为日常效率而生</h2>
+        <p class="section-subtitle">专为 Windows 11 量身雕琢的桌面细节增强，轻巧、自然、纯粹</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon icon-calendar">📅</div>
+          <h3>中国传统农历与节气</h3>
+          <p>内置高精度公农历推算算法，支持初一月名转换、除夕/中秋/端午等民俗节日，二十四节气毫厘不差。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-badge">🚩</div>
+          <h3>休班调休全自动同步</h3>
+          <p>依据中国政府网最新节假日排班公告，后台静默校验更新；法定节假日红字标「休」，周末调休绿字标「班」。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-window">🪟</div>
+          <h3>Win 11 风格与双色跟随</h3>
+          <p>遵循 Windows 11 Fluent 现代视觉规范，具备微阴影与圆角布局；自动跟随系统深/浅色模式无缝变换。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-shield">🛡️</div>
+          <h3>零驱动/免钩子，安全可靠</h3>
+          <p>不注入进程、不使用全局鼠标钩子（规避杀毒误报）；以纯 Win32 隐形穿透层捕获点击，干净清爽。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-cpu">⚡</div>
+          <h3>极低内存与 0 CPU 常驻</h3>
+          <p>空闲时进程进入休眠状态，CPU 占用率始终为 0%；日常内存占用仅约 20MB 左右，比浏览器一个标签页更省。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-gear">⚙️</div>
+          <h3>全系统版本智能适配</h3>
+          <p>内置 UI Automation 4 级容灾定位，深度兼容 Win11 24H2 及 25H2 多种时钟类名；支持点击位置自定义微调。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 安装与运行指引 -->
+  <section id="install" class="install-section">
+    <div class="section-container">
+      <div class="section-header text-center">
+        <h2 class="section-title">三步开启使用</h2>
+        <p class="section-subtitle">完全绿色免安装，解压后双击即可立即生效</p>
+      </div>
+
+      <div class="steps-wrapper">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>下载压缩包并解压</h3>
+          <p>点击上方「立即下载」获取最新版本 zip（仅约 132KB），解压到你喜欢的任意目录（如 <code>D:\Tools\TaskbarCalendar</code>）。</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>双击运行可执行文件</h3>
+          <p>启动 <code>TaskbarCalendar.exe</code>。若弹出 SmartScreen 拦截提示，点击<strong>「更多信息」→「仍要运行」</strong>即可。</p>
+          <div class="tip-box">
+            <strong>为何提示未知发布者？</strong><br>
+            因个人开源项目未购买高额商业数字证书（每年数千元）。代码已在 GitHub 100% 开源，欢迎检阅审计。
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>点击右下角时钟</h3>
+          <p>程序已在系统托盘常驻。此时点击任务栏右下角时钟，日历面板即刻展现在你眼前！托盘右键可一键设置开机自启动。</p>
+        </div>
+      </div>
+
+      <!-- 运行时提示 -->
+      <div class="runtime-alert">
+        <div class="alert-icon">💡</div>
+        <div class="alert-content">
+          <h4>若提示缺少 .NET 桌面运行时：</h4>
+          <p>本项目基于 .NET 8 构建以换取极小体积与极致性能。首次运行时若系统未安装，Windows 会自动弹窗引导前往微软官网下载安装（约 55MB，只需安装一次，全电脑 .NET 软件通用）。</p>
+          <a href="https://dotnet.microsoft.com/download/dotnet/8.0" target="_blank" rel="noopener noreferrer" class="link-inline">👉 微软官方 .NET 8 桌面运行时下载直链</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 常见问题 -->
+  <section id="faq" class="faq-section">
+    <div class="section-container">
+      <div class="section-header text-center">
+        <h2 class="section-title">常见问题解答</h2>
+        <p class="section-subtitle">了解更多关于原理与日常使用的细节</p>
+      </div>
+
+      <div class="faq-accordion">
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>点击右下角时钟后，系统的通知中心还能打开吗？</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>完全不受影响！</strong> 本程序仅替换「点击时钟弹出日历」的操作行为。通知中心可随时通过点击时钟右侧的<strong>通知铃铛图标</strong>，或按下全局快捷键 <code>Win + N</code> 照常呼出。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>如何设置开机自动启动？</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>右键任务栏右下角的托盘图标（蓝色日历图标），点击「设置」，在常规设置中勾选<strong>「开机自动启动」</strong>即可；也可以直接在托盘右键菜单中快速勾选。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>节假日与调休数据需要手动更新吗？</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>不需要。</strong> 程序内置自动同步机制，每天会在后台静默校验国务院公布的最新节假日安排并存入本地缓存；即使完全离线运行，也能显示已缓存的节假日排班。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>如果点击区域与我的时钟位置稍微有点偏差，该如何调节？</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>打开「设置」→「时钟区域校准」，提供了水平与垂直像素偏移微调滑块；针对特殊系统多屏环境，还支持「5秒手动取点校准」，指哪打哪。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>如何彻底卸载或退出？</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>右键托盘图标选择「退出」，然后直接删除解压的程序文件夹即可。绿色软件不在系统目录制造残留文件，零注册表垃圾。</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 底部 CTA 呼吁 -->
+  <section class="cta-section">
+    <div class="section-container text-center">
+      <h2 class="cta-title">重拾清爽直观的 Windows 日历体验</h2>
+      <p class="cta-desc">132 KB 的极致轻巧，无需等待，解压立即可用</p>
+      <div class="cta-actions">
+        <a href="download/TaskbarCalendar-v1.0.2-lite-win-x64.zip" class="btn btn-primary btn-lg" download>
+          立即下载 (v1.0.2)
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <img src="assets/favicon.ico" alt="应用图标" width="24" height="24">
+          <span>任务栏日历</span>
+        </div>
+        <p class="footer-tag">轻巧好用的 Windows 11 农历增强时钟插件</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>项目链接</h4>
+        <ul>
+          <li><a href="https://github.com/IceCoder1994/taskbar-calendar" target="_blank" rel="noopener noreferrer">GitHub 仓库源码</a></li>
+          <li><a href="https://github.com/IceCoder1994/taskbar-calendar/releases" target="_blank" rel="noopener noreferrer">历史发布版本</a></li>
+          <li><a href="https://github.com/IceCoder1994/taskbar-calendar/issues" target="_blank" rel="noopener noreferrer">提交 Issue / 反馈</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>致谢与许可</h4>
+        <ul>
+          <li>基于 <a href="https://github.com/IceCoder1994/taskbar-calendar/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a> 自由开源</li>
+          <li>节假日接口由 <a href="https://timor.tech" target="_blank" rel="noopener noreferrer">timor.tech</a> 赞助提供</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom text-center">
+      <p>© 2026 任务栏日历 (Taskbar Calendar) · Made with ❤️ for Windows Users</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
