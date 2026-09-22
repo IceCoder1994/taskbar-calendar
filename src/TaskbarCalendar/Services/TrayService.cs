@@ -96,8 +96,8 @@ public sealed class TrayService : IDisposable
     {
         try
         {
-            // 单文件发布时没有外部 Assets 目录，直接提取 exe 嵌入的应用程序图标
-            string? exePath = Environment.ProcessPath;
+            // .NET Framework 下无 ProcessPath API，改用进程主模块路径；图标优先取 exe 嵌入图标
+            string? exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
             if (!string.IsNullOrEmpty(exePath))
             {
                 Icon? extracted = Icon.ExtractAssociatedIcon(exePath);

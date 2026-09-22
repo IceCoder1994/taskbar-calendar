@@ -129,12 +129,12 @@ public partial class SettingsWindow : Window
 
         if (int.TryParse(OffsetXBox.Text, out int offsetX))
         {
-            settings.OffsetX = Math.Clamp(offsetX, -200, 200);
+            settings.OffsetX = MathCompat.Clamp(offsetX, -200, 200);
         }
 
         if (int.TryParse(OffsetYBox.Text, out int offsetY))
         {
-            settings.OffsetY = Math.Clamp(offsetY, -200, 200);
+            settings.OffsetY = MathCompat.Clamp(offsetY, -200, 200);
         }
 
         // 仅在状态不一致时写注册表

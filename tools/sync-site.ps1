@@ -23,11 +23,9 @@ if (-not $version) {
 $tag = "v$version"
 Write-Output "当前版本: $tag"
 
-# 2. 按与 CI 一致的参数发布单文件版
+# 2. 按与 CI 一致的参数发布（.NET Framework 4.8，无需运行时）
 if (Test-Path $distDir) { Remove-Item $distDir -Recurse -Force }
-dotnet publish $project -c Release -r win-x64 --self-contained false `
-    -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false `
-    -p:Version=$version -o $distDir --nologo
+dotnet publish $project -c Release -p:Version=$version -o $distDir --nologo
 if ($LASTEXITCODE -ne 0) {
     throw "发布失败，退出码 $LASTEXITCODE"
 }
@@ -36,15 +34,15 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item $manualDoc (Join-Path $distDir '使用说明.txt') -Force
 New-Item -ItemType Directory -Path $siteDownload -Force | Out-Null
 Get-ChildItem $siteDownload -Filter '*.zip' | Remove-Item -Force
-$zipPath = Join-Path $siteDownload "TaskbarCalendar-$tag-lite-win-x64.zip"
+$zipPath = Join-Path $siteDownload "TaskbarCalendar-$tag-win-x64.zip"
 Compress-Archive -Path (Join-Path $distDir '*') -DestinationPath $zipPath -Force
 $zipKB = [math]::Round((Get-Item $zipPath).Length / 1KB)
-Write-Output "下载包已更新: site\download\TaskbarCalendar-$tag-lite-win-x64.zip ($zipKB KB)"
+Write-Output "下载包已更新: site\download\TaskbarCalendar-$tag-win-x64.zip ($zipKB KB)"
 
 # 4. 更新页面中的版本号（zip 文件名 + 展示版本号）
 foreach ($file in @($indexHtml, $errorHtml)) {
     $text = [System.IO.File]::ReadAllText($file, [System.Text.Encoding]::UTF8)
-    $text = [regex]::Replace($text, 'TaskbarCalendar-v[\d.]+-lite-win-x64\.zip', "TaskbarCalendar-$tag-lite-win-x64.zip")
+    $text = [regex]::Replace($text, 'TaskbarCalendar-v[\d.]+(?:-lite)?-win-x64\.zip', "TaskbarCalendar-$tag-win-x64.zip")
     $text = [regex]::Replace($text, 'v\d+\.\d+\.\d+', $tag)
     [System.IO.File]::WriteAllText($file, $text, $utf8NoBom)
     Write-Output "已更新版本号: $(Split-Path -Leaf $file)"

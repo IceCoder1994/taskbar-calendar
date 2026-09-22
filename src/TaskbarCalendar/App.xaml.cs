@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using TaskbarCalendar.Calendar;
@@ -36,6 +37,9 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // .NET Framework 默认不启用 TLS 1.2，节假日同步走 HTTPS 必须显式开启（幂等，可重复调用）
+        ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
         // 单实例检查：重复启动时提示并退出
         _singleInstanceMutex = new Mutex(true, MutexName, out bool createdNew);

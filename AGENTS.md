@@ -7,8 +7,8 @@
 | 项 | 内容 |
 | --- | --- |
 | 目标系统 | Windows 11（24H2 实测），仅 x64 |
-| 技术栈 | C# / .NET 8 / WPF（`net8.0-windows`），零第三方 NuGet 依赖 |
-| 发布形态 | 轻量版（框架依赖 .NET 8 Desktop Runtime），约 130KB zip |
+| 技术栈 | C# / .NET Framework 4.8 / WPF（`net48`，LangVersion 12），仅 System.Text.Json 一个 NuGet 依赖 |
+| 发布形态 | 免安装（依赖 Win10/11 系统自带的 .NET Framework 4.8），zip 约 500KB / 解压约 1.7MB |
 | 仓库 | https://github.com/IceCoder1994/taskbar-calendar（MIT） |
 | 官网 | https://calendar.icewang.qzz.io/（`site/` 纯静态单页，Cloudflare Pages 托管，免备案） |
 | 文档 | `docs/功能清单.md`（需求与变更记录）、`docs/使用说明.txt`、`README.md` |
@@ -52,9 +52,12 @@ src/TaskbarCalendar/
 │  ├─ ThemeService.cs       # 系统深浅色 / 强调色读取
 │  ├─ Logger.cs             # 按日归档文件日志
 │  └─ AppPaths.cs           # 全部路径常量
-└─ Calendar/
-   ├─ LunarService.cs       # 农历/节气/传统节日/干支（ChineseLunisolarCalendar）
-   └─ HolidayService.cs     # 节假日数据：本地 JSON + timor.tech 在线同步 + lastSync
+├─ Calendar/
+│  ├─ LunarService.cs       # 农历/节气/传统节日/干支（ChineseLunisolarCalendar）
+│  └─ HolidayService.cs     # 节假日数据：本地 JSON + timor.tech 在线同步 + lastSync
+├─ Compat/
+│  └─ Net48Polyfills.cs     # 兼容层：IsExternalInit / required 特性 / MathCompat / KeyValuePair 解构
+└─ GlobalUsings.cs          # 全局 using（导入兼容层命名空间）
 
 site/                       # 官网静态单页（Cloudflare Pages 构建输出目录，无构建步骤）
 ├─ index.html               #   首页：下载入口 / 安装引导 / FAQ
@@ -94,12 +97,12 @@ site/                       # 官网静态单页（Cloudflare Pages 构建输出
    $c = [System.IO.File]::ReadAllText($p, [System.Text.Encoding]::UTF8)
    [System.IO.File]::WriteAllText($p, $c, (New-Object System.Text.UTF8Encoding $true))
    ```
-2. **WPF 项目的 ImplicitUsings 不含 `System.IO` 与 `System.Net.Http`**，使用需显式 `using`；
+2. **.NET Framework 下 `System.Net.Http` 必须显式引用**：csproj 已加 `<Reference Include="System.Net.Http" />`（net8 由框架自带）；`System.IO` 由 ImplicitUsings 提供，但 UIAutomation 相关类型需见陷阱 5；
 3. **`UseWindowsForms` 注入全局 using 导致同名类型冲突**，本项目已用别名消歧：`Application`、`MessageBox`、`Button`、`Brush`、`Brushes`、`Color`、`KeyEventArgs`、`MouseWheelEventArgs`、`KeyboardFocusChangedEventArgs`、`Cursor`。新增文件遇到 `CS0104` 先加别名；
 4. **点击层的透明与光标**：`SetLayeredWindowAttributes(alpha=1)`（alpha=0 会穿透点击）；窗口类必须 `hCursor=IDC_ARROW` 且处理 `WM_SETCURSOR`，否则光标会"冻结"在进入前的状态（如转圈）；
-5. **UIAutomationClient 由 WPF 框架自带**，不要添加 NuGet 或裸 `<Reference>`（会 MSB3245）；
+5. **UIAutomation 引用方式随 TFM 不同**：`net48` 必须在 csproj 显式 `<Reference Include="UIAutomationClient" />` 与 `UIAutomationTypes`（缺失报 CS0234）；`net8.0-windows` 下由 WPF 框架自带，裸 `<Reference>` 会 MSB3245；
 6. **节假日 JSON 序列化**：读取大小写不敏感；写出用 camelCase + `UnsafeRelaxedJsonEscaping`；设置文件枚举用 `JsonStringEnumConverter`（否则字符串枚举解析失败回落默认值）；
-7. **单文件发布下 `Assets/app.ico` 可能不外置**：托盘图标优先用 `Icon.ExtractAssociatedIcon(ProcessPath)` 从 exe 提取；
+7. **托盘图标优先从 exe 提取**：`Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule?.FileName)`（net48 无 `Environment.ProcessPath` 可用），失败时才回退 `Assets/app.ico`；
 8. **发布被文件锁定**：本地覆盖 `publish\` 前必须退出正在运行的实例（`Get-Process TaskbarCalendar` 确认）；CI（Actions）不受影响；
 9. **单实例 Mutex** 为 `Global\TaskbarCalendar.SingleInstance`：自动化测试启动新实例前先杀掉旧实例，否则弹"已在运行"对话框阻塞脚本；
 10. **节气算法**为寿星公式（21 世纪），个别年份可能 ±1 天；发现偏差需查证后修正 `LunarService.SolarTermConstants` 或加例外表。
@@ -108,6 +111,9 @@ site/                       # 官网静态单页（Cloudflare Pages 构建输出
 13. **官网下载包依赖 .gitignore 例外**：根 `.gitignore` 有 `*.zip` 规则，`site/download/` 通过 `!site/download/*.zip` 例外交付；新增站点二进制资源时注意同样处理。
 14. **Cloudflare 上 `*.pages.dev` 共享域在国内不稳定**：对外一律使用自定义域 `calendar.icewang.qzz.io`；页面内资源用相对路径（`assets/...`），404 页用绝对路径（`/assets/...`）以兼容任意深度路径。
 15. **演示 GIF 录制有隐式依赖**：`tools\record-demo.ps1` 会强制重启 `D:\TaskbarCalendar\TaskbarCalendar.exe`（可用 `-ExePath` 覆盖）并真实控制鼠标约 7 秒；面板内元素坐标基于 360×460 面板与 UIA 实测（`record_demo.py` 顶部注释），时钟坐标依赖日志格式 `时钟位置更新: (左,上)-(右,下)`；改动面板布局、尺寸或日志格式后需同步更新脚本，否则会点到错误位置。
+16. **net48 兼容层与 API 红线**：`Compat/Net48Polyfills.cs` 提供 `IsExternalInit`、`RequiredMemberAttribute` 等编译器标记类型（支撑 record / init / required），以及 `MathCompat.Clamp` 与 `KeyValuePair` 解构扩展；业务代码不得直接使用 .NET Core 专有 API —— `Environment.ProcessPath` → `Process.GetCurrentProcess().MainModule?.FileName`、`str.AsSpan(n, len)` → `Substring(n, len)`、`name[..n]` → `Substring(0, n)`、`Math.Clamp` → `MathCompat.Clamp`、`KeyValuePair` 解构依赖兼容层扩展。
+17. **net48 下节假日同步必须显式开启 TLS 1.2**：`App.OnStartup` 中的 `ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12` 不可删除，否则 HTTPS 请求全部失败（表现为节假日自动同步报错）。
+18. **发布包名自 v1.1.0 起不含 `-lite`**：下载包为 `TaskbarCalendar-v{版本}-win-x64.zip`；CI 与本地脚本均不使用 `--self-contained` / `PublishSingleFile`（net48 不支持），产物为 exe + 若干依赖 dll 的目录（约 1.7MB，zip 约 500KB）。
 
 ## 测试方式（无单元测试）
 
@@ -135,7 +141,7 @@ git tag v1.0.2; git push origin v1.0.2
 gh release view v1.0.2
 ```
 
-工作流会构建轻量版（框架依赖 + 单文件）、打包 `TaskbarCalendar-v*-lite-win-x64.zip` 并自动发布 Release。
+工作流会构建 .NET Framework 4.8 版本（用户免安装）、打包 `TaskbarCalendar-v*-win-x64.zip` 并自动发布 Release。
 
 ## 外部依赖与数据
 

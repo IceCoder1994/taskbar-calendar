@@ -20,13 +20,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build framework-dependent single file
+      - name: Build (.NET Framework 4.8, no runtime install required)
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           dotnet publish src/TaskbarCalendar/TaskbarCalendar.csproj `
-            -c Release -r win-x64 --self-contained false `
-            -p:PublishSingleFile=true `
+            -c Release `
             -p:DebugType=None -p:DebugSymbols=false `
             -p:Version=$version `
             -o dist
@@ -36,11 +35,11 @@ jobs:
         run: |
           $tag = "${{ github.ref_name }}"
           Copy-Item "docs/使用说明.txt" "dist/使用说明.txt" -Force
-          Compress-Archive -Path 'dist/*' -DestinationPath "TaskbarCalendar-$tag-lite-win-x64.zip" -Force
+          Compress-Archive -Path 'dist/*' -DestinationPath "TaskbarCalendar-$tag-win-x64.zip" -Force
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
-          files: TaskbarCalendar-*-lite-win-x64.zip
+          files: TaskbarCalendar-*-win-x64.zip
           generate_release_notes: true

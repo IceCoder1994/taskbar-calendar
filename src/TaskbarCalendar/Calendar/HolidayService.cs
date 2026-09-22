@@ -125,7 +125,7 @@ public sealed class HolidayService
         var years = new SortedSet<int>();
         foreach (string key in _days.Keys)
         {
-            if (key.Length >= 4 && int.TryParse(key.AsSpan(0, 4), out int year))
+            if (key.Length >= 4 && int.TryParse(key.Substring(0, 4), out int year))
             {
                 years.Add(year);
             }
@@ -232,7 +232,7 @@ public sealed class HolidayService
         foreach (string key in _days.Keys)
         {
             if (key.Length >= 4
-                && int.TryParse(key.AsSpan(0, 4), out int keyYear)
+                && int.TryParse(key.Substring(0, 4), out int keyYear)
                 && updatedYears.Contains(keyYear))
             {
                 merged.Remove(key);
@@ -283,7 +283,8 @@ public sealed class HolidayService
             }
 
             string? date = dateElement.GetString();
-            if (string.IsNullOrEmpty(date) || !date.StartsWith(year.ToString(), StringComparison.Ordinal))
+            // 注意：.NET Framework 的 string.IsNullOrEmpty 缺少可空性标注，此处显式判空以消除误报
+            if (date is null || date.Length == 0 || !date.StartsWith(year.ToString(), StringComparison.Ordinal))
             {
                 continue;
             }

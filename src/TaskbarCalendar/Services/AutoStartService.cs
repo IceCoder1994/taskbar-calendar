@@ -33,7 +33,7 @@ public static class AutoStartService
             using RegistryKey key = Registry.CurrentUser.CreateSubKey(RunKeyPath, true);
             if (enabled)
             {
-                string? exePath = Environment.ProcessPath;
+                string? exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
                 if (string.IsNullOrEmpty(exePath))
                 {
                     Logger.Warn("无法获取程序路径，未能设置自启");

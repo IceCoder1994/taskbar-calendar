@@ -113,7 +113,7 @@ public static class LunarService
             nominalMonth = month - 1;
         }
 
-        string name = LunarMonthNames[Math.Clamp(nominalMonth - 1, 0, LunarMonthNames.Length - 1)];
+        string name = LunarMonthNames[MathCompat.Clamp(nominalMonth - 1, 0, LunarMonthNames.Length - 1)];
         return isLeap ? "闰" + name : name;
     }
 

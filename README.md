@@ -30,18 +30,18 @@
 **方式二（GitHub）**：
 
 1. 前往 [Releases](https://github.com/IceCoder1994/taskbar-calendar/releases) 页面
-2. 下载最新版 `TaskbarCalendar-vX.X.X-lite-win-x64.zip`（约 140 KB）
+2. 下载最新版 `TaskbarCalendar-vX.X.X-win-x64.zip`（约 500 KB）
 3. 解压到任意文件夹（如 `D:\TaskbarCalendar`）
 4. 双击 `TaskbarCalendar.exe` 运行 —— 程序会驻留在系统托盘（蓝色日历图标）
 5. 点击右下角时钟，即可看到你的日历
 
-**系统要求**：Windows 11（64 位）+ [.NET 8 桌面运行时](https://dotnet.microsoft.com/download/dotnet/8.0)
-
-> **没有安装 .NET 运行时？** 不用手动找：双击程序后 Windows 会弹出官方提示，
-> 点击「是」自动跳转微软下载页安装（约 55MB，一次性，装完后所有 .NET 程序通用）。
+**系统要求**：Windows 11（64 位）—— **完全免安装**，程序基于系统自带的 .NET Framework 4.8 构建，无需下载任何运行时组件
 
 > **首次运行提示**：由于程序未做数字签名，Windows SmartScreen 可能提示「Windows 已保护你的电脑」。
 > 请点击「更多信息」→「仍要运行」。如杀毒软件误报，请将程序目录添加为信任。
+
+> **完全免安装**：程序基于 Windows 自带的 .NET Framework 4.8 构建（Win10/11 均已内置），
+> 不需要安装任何运行时组件；解压后双击即可使用。
 
 ## 使用说明
 
@@ -76,7 +76,7 @@ A：托盘右键 → 退出，然后删除程序文件夹即可。如果开启�
 
 ## 开发构建
 
-需要 [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)：
+需要 [.NET SDK](https://dotnet.microsoft.com/download/dotnet)（构建目标为 .NET Framework 4.8，运行时由 Windows 系统自带，仅开发构建时需要 SDK）：
 
 ```powershell
 git clone https://github.com/IceCoder1994/taskbar-calendar.git

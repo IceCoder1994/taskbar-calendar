@@ -224,8 +224,8 @@ public sealed class ClockLocator : IDisposable
             return null;
         }
 
-        int width = Math.Clamp(settings.ManualClockRectWidth, 20, 400);
-        int height = Math.Clamp(settings.ManualClockRectHeight, 10, 200);
+        int width = MathCompat.Clamp(settings.ManualClockRectWidth, 20, 400);
+        int height = MathCompat.Clamp(settings.ManualClockRectHeight, 10, 200);
         int left = settings.ManualClockRectX - (width / 2);
         int top = settings.ManualClockRectY - (height / 2);
         return new ClockRect(left, top, left + width, top + height);
@@ -363,7 +363,7 @@ public sealed class ClockLocator : IDisposable
                 string name = (info.Name ?? string.Empty).Replace("\r", " ").Replace("\n", " ");
                 if (name.Length > 60)
                 {
-                    name = name[..60] + "…";
+                    name = name.Substring(0, 60) + "…";
                 }
 
                 var bounds = info.BoundingRectangle;
