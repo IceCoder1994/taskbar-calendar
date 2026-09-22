@@ -130,17 +130,42 @@
                        TextWrapping="Wrap"
                        Margin="0,8,0,0" />
 
-            <TextBlock FontSize="15" FontWeight="SemiBold" Text="关于" Margin="0,18,0,10" />
+            <TextBlock FontSize="15" FontWeight="SemiBold" Text="版本与更新" Margin="0,18,0,10" />
 
             <TextBlock x:Name="AboutText"
                        FontSize="12"
                        Foreground="#666666"
-                       TextWrapping="Wrap" />
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,8" />
+
+            <CheckBox x:Name="AutoCheckUpdateCheck"
+                      Content="每天自动检查新版本（静默）"
+                      Margin="0,0,0,10"
+                      Checked="OnSettingChanged"
+                      Unchecked="OnSettingChanged" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <Button x:Name="CheckUpdateButton"
+                        Content="检查更新"
+                        Padding="12,6"
+                        Click="OnCheckUpdateClick" />
+                <Button x:Name="VisitWebsiteButton"
+                        Content="访问官网"
+                        Padding="12,6"
+                        Margin="10,0,0,0"
+                        Click="OnVisitWebsiteClick" />
+            </StackPanel>
+
+            <TextBlock x:Name="UpdateCheckStatusText"
+                       FontSize="12"
+                       Foreground="#0078D4"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,12" />
 
             <Button Content="关闭"
                     Width="90"
                     HorizontalAlignment="Right"
-                    Margin="0,18,0,0"
+                    Margin="0,8,0,0"
                     IsCancel="True"
                     Click="OnCloseClick" />
         </StackPanel>

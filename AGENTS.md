@@ -44,8 +44,11 @@ src/TaskbarCalendar/
 ├─ UI/
 │  ├─ CalendarPopupWindow.* # 日历面板（月历/年月光选择器/详情栏/主题）
 │  ├─ SettingsWindow.*      # 设置窗口
+│  ├─ UpdateWindow.*        # 新版本检查与自动就地更新弹窗
 │  └─ DayCell.cs            # 日期格数据模型（不可变，每次重建）
 ├─ Services/
+│  ├─ AppInfo.cs            # 版本号反射读取与官网地址常量
+│  ├─ UpdateService.cs      # 版本检查、流式下载、解压与后台批处理自覆盖重启
 │  ├─ TrayService.cs        # 托盘图标与菜单
 │  ├─ SettingsService.cs    # 设置持久化（单例）+ Changed 事件
 │  ├─ AutoStartService.cs   # HKCU Run 开机自启

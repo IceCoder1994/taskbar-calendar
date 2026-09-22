@@ -16,6 +16,7 @@ public sealed class TrayService : IDisposable
     private NotifyIcon? _notifyIcon;
     private ContextMenuStrip? _menu;
     private ToolStripMenuItem? _autoStartItem;
+    private UpdateInfo? _pendingUpdate;
     private Icon? _trayIcon;
 
     /// <summary>请求打开日历面板</summary>
@@ -23,6 +24,9 @@ public sealed class TrayService : IDisposable
 
     /// <summary>请求打开设置窗口</summary>
     public event EventHandler? OpenSettingsRequested;
+
+    /// <summary>请求检查更新</summary>
+    public event EventHandler? CheckUpdateRequested;
 
     /// <summary>请求重新定位时钟</summary>
     public event EventHandler? RelocateRequested;
@@ -56,6 +60,10 @@ public sealed class TrayService : IDisposable
         logItem.Click += (_, _) => OpenLogFolder();
         _menu.Items.Add(logItem);
 
+        var updateItem = new ToolStripMenuItem("检查更新(&U)...");
+        updateItem.Click += (_, _) => CheckUpdateRequested?.Invoke(this, EventArgs.Empty);
+        _menu.Items.Add(updateItem);
+
         var aboutItem = new ToolStripMenuItem("关于(&A)");
         aboutItem.Click += (_, _) => ShowAbout();
         _menu.Items.Add(aboutItem);
@@ -74,9 +82,30 @@ public sealed class TrayService : IDisposable
             ContextMenuStrip = _menu,
         };
         _notifyIcon.DoubleClick += (_, _) => OpenCalendarRequested?.Invoke(this, EventArgs.Empty);
+        _notifyIcon.BalloonTipClicked += (_, _) => OnBalloonTipClicked();
 
         UpdateAutoStartItem();
         Logger.Info("托盘图标已就绪");
+    }
+
+    private void OnBalloonTipClicked()
+    {
+        if (_pendingUpdate is not null)
+        {
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var updateWin = new TaskbarCalendar.UI.UpdateWindow(_pendingUpdate);
+                updateWin.Show();
+                updateWin.Activate();
+            }));
+        }
+    }
+
+    /// <summary>通知发现新版本，弹出气泡并在点击时唤起更新窗口</summary>
+    public void NotifyUpdateAvailable(UpdateInfo info)
+    {
+        _pendingUpdate = info;
+        ShowBalloon($"发现新版本 v{info.Version}", "点击即可就地一键更新并自动重启，或打开设置查看详情。");
     }
 
     /// <summary>在鼠标位置弹出托盘右键菜单</summary>
@@ -154,7 +183,10 @@ public sealed class TrayService : IDisposable
     private static void ShowAbout()
     {
         MessageBox.Show(
-            "任务栏日历 v1.0.0\n\n点击任务栏时钟弹出本日历，替代系统原生日历面板。\n设置文件与日志可在托盘菜单中打开。",
+            $"任务栏日历 {AppInfo.CurrentVersionTag}\n\n" +
+            "点击任务栏时钟弹出专属农历与调休月历，替代系统原生日历面板。\n" +
+            $"官方网站：{AppInfo.WebsiteUrl}\n\n" +
+            "设置与日志可在托盘菜单中直接打开。",
             "关于 任务栏日历",
             System.Windows.MessageBoxButton.OK,
             System.Windows.MessageBoxImage.Information);

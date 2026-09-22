@@ -17,6 +17,7 @@ namespace TaskbarCalendar.UI;
 public partial class SettingsWindow : Window
 {
     private readonly HolidayService _holidayService = new();
+    private readonly UpdateService _updateService = new();
 
     private bool _loading;
     private DispatcherTimer? _calibrateTimer;
@@ -46,12 +47,14 @@ public partial class SettingsWindow : Window
         ShowLunarCheck.IsChecked = settings.ShowLunar;
         ShowHolidayMarkCheck.IsChecked = settings.ShowHolidayMark;
         AutoSyncCheck.IsChecked = settings.AutoSyncHolidays;
+        AutoCheckUpdateCheck.IsChecked = settings.AutoCheckUpdate;
         ForceManualClockCheck.IsChecked = settings.ForceManualClockRect;
         OffsetXBox.Text = settings.OffsetX.ToString();
         OffsetYBox.Text = settings.OffsetY.ToString();
 
         AboutText.Text =
-            $"任务栏日历 v1.0.0\n" +
+            $"任务栏日历 {AppInfo.CurrentVersionTag}（.NET Framework 4.8 免安装版）\n" +
+            $"官网：{AppInfo.WebsiteUrl}\n" +
             $"设置文件：{AppPaths.SettingsFilePath}\n" +
             $"日志目录：{AppPaths.LogDirectory}";
 
@@ -125,6 +128,7 @@ public partial class SettingsWindow : Window
         settings.ShowLunar = ShowLunarCheck.IsChecked == true;
         settings.ShowHolidayMark = ShowHolidayMarkCheck.IsChecked == true;
         settings.AutoSyncHolidays = AutoSyncCheck.IsChecked == true;
+        settings.AutoCheckUpdate = AutoCheckUpdateCheck.IsChecked == true;
         settings.ForceManualClockRect = ForceManualClockCheck.IsChecked == true;
 
         if (int.TryParse(OffsetXBox.Text, out int offsetX))
@@ -230,6 +234,53 @@ public partial class SettingsWindow : Window
         {
             ClearCalibrationButton.IsEnabled = false;
             ClockLocateStatusText.Text = "未校准手动位置（当前完全依赖自动定位）。";
+        }
+    }
+
+    /// <summary>手动触发版本更新检查</summary>
+    private async void OnCheckUpdateClick(object sender, RoutedEventArgs e)
+    {
+        CheckUpdateButton.IsEnabled = false;
+        UpdateCheckStatusText.Text = "正在检查更新...";
+
+        try
+        {
+            UpdateCheckResult result = await _updateService.CheckUpdateAsync(silent: false);
+            if (result.HasUpdate && result.Info is not null)
+            {
+                UpdateCheckStatusText.Text = $"发现新版本 v{result.Info.Version}";
+                var updateWin = new UpdateWindow(result.Info) { Owner = this };
+                updateWin.ShowDialog();
+            }
+            else
+            {
+                UpdateCheckStatusText.Text = result.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateCheckStatusText.Text = $"检查更新失败: {ex.Message}";
+        }
+        finally
+        {
+            CheckUpdateButton.IsEnabled = true;
+        }
+    }
+
+    /// <summary>浏览器打开官网</summary>
+    private void OnVisitWebsiteClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = AppInfo.WebsiteUrl,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("打开官网失败", ex);
         }
     }
 

@@ -31,6 +31,7 @@ public partial class App : Application
     private DispatcherTimer? _topmostTimer;
     private DispatcherTimer? _autoSyncTimer;
     private HolidayService? _autoSyncService;
+    private readonly UpdateService _updateService = new();
     private int _locateFailCount;
     private bool _locateWarned;
 
@@ -62,6 +63,7 @@ public partial class App : Application
         _trayService.Initialize();
         _trayService.OpenCalendarRequested += (_, _) => Dispatcher.BeginInvoke(ShowCalendar);
         _trayService.OpenSettingsRequested += (_, _) => Dispatcher.BeginInvoke(ShowSettings);
+        _trayService.CheckUpdateRequested += (_, _) => Dispatcher.BeginInvoke(ManualCheckUpdate);
         _trayService.RelocateRequested += (_, _) => Dispatcher.BeginInvoke(RelocateClock);
 
         StartClockOverlay();
@@ -120,10 +122,56 @@ public partial class App : Application
         try
         {
             await _autoSyncService!.MaybeAutoSyncAsync(TimeSpan.FromHours(24));
+            await CheckUpdateQuietlyAsync();
         }
         catch (Exception ex)
         {
-            Logger.Error("节假日自动同步异常", ex);
+            Logger.Error("后台自动同步或检查更新异常", ex);
+        }
+    }
+
+    /// <summary>后台静默检查新版本，发现更新时弹出气泡通知</summary>
+    private async Task CheckUpdateQuietlyAsync()
+    {
+        try
+        {
+            UpdateCheckResult? result = await _updateService.MaybeAutoCheckAsync(TimeSpan.FromHours(24));
+            if (result is not null && result.HasUpdate && result.Info is not null)
+            {
+                _trayService?.NotifyUpdateAvailable(result.Info);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("后台自动检查更新失败", ex);
+        }
+    }
+
+    /// <summary>托盘菜单手动点击检查更新</summary>
+    private async void ManualCheckUpdate()
+    {
+        try
+        {
+            UpdateCheckResult result = await _updateService.CheckUpdateAsync(silent: false);
+            if (result.HasUpdate && result.Info is not null)
+            {
+                var updateWin = new UpdateWindow(result.Info);
+                updateWin.Show();
+                updateWin.Activate();
+            }
+            else
+            {
+                MessageBox.Show(
+                    result.Message,
+                    "检查更新",
+                    MessageBoxButton.OK,
+                    result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("手动检查更新失败", ex);
+            MessageBox.Show($"检查更新失败：{ex.Message}", "检查更新", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 

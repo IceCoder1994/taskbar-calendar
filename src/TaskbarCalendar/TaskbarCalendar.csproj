@@ -26,8 +26,9 @@
     <!-- .NET Framework 下 UI Automation 需显式引用（.NET 8 由 WPF 框架自带） -->
     <Reference Include="UIAutomationClient" />
     <Reference Include="UIAutomationTypes" />
-    <!-- .NET Framework 下 HttpClient 位于独立程序集 -->
+    <!-- .NET Framework 下 HttpClient 与 Zip 压缩位于独立程序集 -->
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
 
   <ItemGroup>

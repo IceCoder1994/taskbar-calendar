@@ -55,6 +55,26 @@ $text = [regex]::Replace($text, '<lastmod>[\d-]+</lastmod>', "<lastmod>$today</l
 [System.IO.File]::WriteAllText($sitemap, $text, $utf8NoBom)
 Write-Output "已更新 sitemap lastmod: $today"
 
+# 6. 同步 site/version.json（客户端更新检查元数据）
+$versionJsonPath = Join-Path $root 'site\version.json'
+$verMeta = [ordered]@{
+    version = $version
+    releaseDate = $today
+    downloadUrl = "https://calendar.icewang.qzz.io/download/TaskbarCalendar-$tag-win-x64.zip"
+    changelog = "修复已知问题并提升系统稳定性。"
+}
+if (Test-Path $versionJsonPath) {
+    try {
+        $oldMeta = Get-Content $versionJsonPath -Encoding UTF8 | ConvertFrom-Json
+        if ($oldMeta.changelog) {
+            $verMeta.changelog = $oldMeta.changelog
+        }
+    } catch { }
+}
+$jsonOutput = ($verMeta | ConvertTo-Json -Depth 4)
+[System.IO.File]::WriteAllText($versionJsonPath, $jsonOutput, $utf8NoBom)
+Write-Output "已更新客户端版本元数据: site\version.json"
+
 Write-Output ''
 Write-Output '完成。请提交并推送 site/ 的改动，Cloudflare Pages 将自动重新部署。'
 Write-Output '若页面截图或 OG 分享图需要更新，请重新生成 site\assets\ 下的图片。'

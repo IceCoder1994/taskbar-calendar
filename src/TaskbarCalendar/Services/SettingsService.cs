@@ -43,6 +43,12 @@ public sealed class AppSettings
     /// <summary>是否每天自动同步节假日数据（静默执行）</summary>
     public bool AutoSyncHolidays { get; set; } = true;
 
+    /// <summary>是否每天自动检查新版本（静默执行）</summary>
+    public bool AutoCheckUpdate { get; set; } = true;
+
+    /// <summary>上次检查新版本的时间（UTC）</summary>
+    public DateTime? LastUpdateCheckTime { get; set; }
+
     /// <summary>时钟区域水平偏移校准（像素）</summary>
     public int OffsetX { get; set; }
 
