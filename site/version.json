@@ -1,6 +1,6 @@
 {
-    "version":  "1.1.0",
-    "releaseDate":  "2026-09-22",
-    "downloadUrl":  "https://calendar.icewang.qzz.io/download/TaskbarCalendar-v1.1.0-win-x64.zip",
-    "changelog":  "1. 运行目标切换为 .NET Framework 4.8，Win10/11 用户彻底免安装任何运行时组件；\n2. 安装包大幅瘦身至约 480 KB；\n3. 修复官网浅色主题配色与展示异常；\n4. 新增软件内一键就地下载替换自更新机制。"
+    "version":  "1.1.1",
+    "releaseDate":  "2026-09-23",
+    "downloadUrl":  "https://calendar.icewang.qzz.io/download/TaskbarCalendar-v1.1.1-win-x64.zip",
+    "changelog":  "1. 修复设置窗口「关于」与托盘关于气泡版本号显示错误（v1.1.0 被误显示为 v1.0.0）；\n2. 版本号统一改为动态读取程序集版本，后续不再出现显示不一致；\n3. 新增应用内一键就地下载、自动替换并重启的自更新机制。"
 }

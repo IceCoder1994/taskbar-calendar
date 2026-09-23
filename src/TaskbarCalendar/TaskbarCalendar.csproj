@@ -14,7 +14,7 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AssemblyTitle>任务栏日历</AssemblyTitle>
     <Product>任务栏日历插件</Product>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <!-- NuGet 依赖（System.Text.Json）在 .NET Framework 下需要绑定重定向 -->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
