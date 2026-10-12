@@ -14,7 +14,7 @@ $issFile = Join-Path $root 'installer\TaskbarCalendar.iss'
 $manualDoc = Join-Path $root 'docs\使用说明.txt'
 $indexHtml = Join-Path $root 'site\index.html'
 $errorHtml = Join-Path $root 'site\404.html'
-$sitemap = Join-Path $root 'sitemap.xml'
+$sitemap = Join-Path $root 'site\sitemap.xml'
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
 
 # 1. 从 csproj 读取当前版本号
