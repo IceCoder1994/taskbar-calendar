@@ -30,18 +30,17 @@
 **方式二（GitHub）**：
 
 1. 前往 [Releases](https://github.com/IceCoder1994/taskbar-calendar/releases) 页面
-2. 下载最新版 `TaskbarCalendar-vX.X.X-win-x64.zip`（约 500 KB）
-3. 解压到任意文件夹（如 `D:\TaskbarCalendar`）
-4. 双击 `TaskbarCalendar.exe` 运行 —— 程序会驻留在系统托盘（蓝色日历图标）
+2. 下载最新版 `TaskbarCalendar-vX.X.X-win-x64-Setup.exe`（约 1 MB）
+3. 双击运行安装器，一路「下一步」即可（**免 UAC**，默认安装到 `%LOCALAPPDATA%\Programs\TaskbarCalendar`）
+4. 安装完成后程序自动运行并驻留系统托盘（蓝色日历图标）
 5. 点击右下角时钟，即可看到你的日历
 
-**系统要求**：Windows 11（64 位）—— **完全免安装**，程序基于系统自带的 .NET Framework 4.8 构建，无需下载任何运行时组件
+**系统要求**：Windows 11（64 位）—— 安装器基于系统自带的 .NET Framework 4.8，**不需要下载任何运行时组件**
 
 > **首次运行提示**：由于程序未做数字签名，Windows SmartScreen 可能提示「Windows 已保护你的电脑」。
 > 请点击「更多信息」→「仍要运行」。如杀毒软件误报，请将程序目录添加为信任。
 
-> **完全免安装**：程序基于 Windows 自带的 .NET Framework 4.8 构建（Win10/11 均已内置），
-> 不需要安装任何运行时组件；解压后双击即可使用。
+> **卸载**：「设置 → 应用 → 任务栏日历 → 卸载」，会同时清理开机自启项与快捷方式。
 
 ## 使用说明
 
@@ -67,7 +66,7 @@ A：通知中心不受影响：点击时钟右侧的铃铛图标，或按 `Win +
 A：不会。程序每天自动同步一次节假日数据（静默执行、失败自动重试）；也可以在 设置 → 节假日数据 中点击「立即同步」。
 
 **Q：如何卸载？**
-A：托盘右键 → 退出，然后删除程序文件夹即可。如果开启过开机自启，请在设置中关闭，或删除注册表项 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\TaskbarCalendar`。
+A：打开「设置 → 应用 → 任务栏日历」点击卸载；也可以进入安装目录运行 `unins000.exe`。卸载会自动清理开机自启项、快捷方式和注册表卸载信息。若只想退出程序：托盘右键 → 退出。
 
 ## 数据来源
 
@@ -83,8 +82,11 @@ git clone https://github.com/IceCoder1994/taskbar-calendar.git
 cd taskbar-calendar
 dotnet build TaskbarCalendar.sln                              # 构建
 dotnet run --project src\TaskbarCalendar                      # 调试运行
-powershell -ExecutionPolicy Bypass -File tools\publish.ps1    # 发布轻量版
+powershell -ExecutionPolicy Bypass -File tools\publish.ps1    # 发布（产物含安装器）
 ```
+
+> 发布安装器需要本机安装 Inno Setup 6（http://www.jrsoftware.org/isdinfo.php）；
+> `publish.ps1` 会自动定位 `ISCC.exe` 并将安装器编译到 `publish/`。
 
 也可以运行 `TaskbarCalendar.exe --settings` 直接打开设置窗口。
 

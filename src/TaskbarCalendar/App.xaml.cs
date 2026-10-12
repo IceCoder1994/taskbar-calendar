@@ -42,6 +42,9 @@ public partial class App : Application
         // .NET Framework 默认不启用 TLS 1.2，节假日同步走 HTTPS 必须显式开启（幂等，可重复调用）
         ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
+        // 向 Restart Manager 注册本进程：安装器强制结束本程序后，装完可自动重启（静默升级链路）
+        RegisterForRestart();
+
         // 单实例检查：重复启动时提示并退出
         _singleInstanceMutex = new Mutex(true, MutexName, out bool createdNew);
         if (!createdNew)
@@ -73,6 +76,31 @@ public partial class App : Application
         if (e.Args.Any(arg => string.Equals(arg, "--settings", StringComparison.OrdinalIgnoreCase)))
         {
             Dispatcher.BeginInvoke(ShowSettings);
+        }
+    }
+
+    /// <summary>
+    /// 向 Windows Restart Manager 注册本进程，使安装器（Inno Setup CloseApplications=force）
+    /// 强制结束本程序后，能在安装完成时自动重启本程序。
+    /// 失败不影响主流程，仅记录日志。
+    /// </summary>
+    private void RegisterForRestart()
+    {
+        try
+        {
+            int hr = NativeMethods.RegisterApplicationRestart("/restart", 0);
+            if (hr == 0)
+            {
+                Logger.Info("已注册 Restart Manager 自动重启");
+            }
+            else
+            {
+                Logger.Warn($"注册 Restart Manager 失败，HRESULT=0x{hr:X8}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn($"注册 Restart Manager 异常: {ex.Message}");
         }
     }
 

@@ -122,6 +122,14 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr GetModuleHandle(string? lpModuleName);
 
+    /// <summary>
+    /// 向 Windows Restart Manager 注册本进程：被安装器（Inno Setup CloseApplications）
+    /// 强制结束后，可在安装完成时由系统自动重启本程序。
+    /// 必须在程序启动早期调用一次。
+    /// </summary>
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    public static extern int RegisterApplicationRestart(string? pwzCommandline, uint dwFlags);
+
     /// <summary>获取主显示器工作区（物理像素）</summary>
     public static RECT GetWorkArea()
     {

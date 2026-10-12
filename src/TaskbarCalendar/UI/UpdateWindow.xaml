@@ -54,7 +54,7 @@
             <Button Grid.Column="0" Content="前往官网" HorizontalAlignment="Left" Padding="10,6" Click="OnOpenWebsiteClick" />
 
             <Button Grid.Column="1" x:Name="CancelButton" Content="稍后再说" Padding="14,6" Margin="0,0,10,0" IsCancel="True" Click="OnCancelClick" />
-            <Button Grid.Column="2" x:Name="UpdateButton" Content="立即就地更新" FontWeight="SemiBold" Padding="16,6" Click="OnUpdateClick" />
+            <Button Grid.Column="2" x:Name="UpdateButton" Content="立即下载并升级" FontWeight="SemiBold" Padding="16,6" Click="OnUpdateClick" />
         </Grid>
     </Grid>
 </Window>

@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +34,7 @@ public sealed class UpdateCheckResult
 }
 
 /// <summary>
-/// 客户端更新检查与就地下载替换自更新服务
+/// 客户端更新检查与静默升级服务：下载安装器（Setup.exe）并以 Inno Setup 静默参数完成升级
 /// </summary>
 public sealed class UpdateService
 {
@@ -127,7 +125,10 @@ public sealed class UpdateService
     }
 
     /// <summary>
-    /// 一键下载新版本压缩包、解压并在后台拉起批处理脚本覆盖自身并自动重启
+    /// 一键下载新版本安装器并以静默参数拉起升级。
+    /// 安装位置为每用户可写目录（%LOCALAPPDATA%\Programs\TaskbarCalendar），
+    /// 静默安装无需管理员权限，且会通过 /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS
+    /// 自动接管本进程占用的文件并在装完后自动重启。
     /// </summary>
     public async Task DownloadAndApplyUpdateAsync(UpdateInfo info, IProgress<int>? progress = null, CancellationToken cancellationToken = default)
     {
@@ -143,12 +144,12 @@ public sealed class UpdateService
         }
         Directory.CreateDirectory(tempRoot);
 
-        string zipPath = Path.Combine(tempRoot, "update.zip");
-        string extractDir = Path.Combine(tempRoot, "extracted");
+        // 安装器命名与站点下载包规则一致（TaskbarCalendar-v{版本}-win-x64-Setup.exe）
+        string setupPath = Path.Combine(tempRoot, $"TaskbarCalendar-v{info.Version}-win-x64-Setup.exe");
 
         Logger.Info($"开始下载新版本安装包: {info.DownloadUrl}");
 
-        // 1. 带进度汇报流式下载
+        // 1. 带进度汇报流式下载安装器
         using (var client = new HttpClient { Timeout = TimeSpan.FromMinutes(3) })
         using (HttpResponseMessage response = await client.GetAsync(info.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
         {
@@ -156,7 +157,7 @@ public sealed class UpdateService
             long totalBytes = response.Content.Headers.ContentLength ?? -1;
 
             using Stream source = await response.Content.ReadAsStreamAsync();
-            using FileStream destination = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            using FileStream destination = new FileStream(setupPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
             byte[] buffer = new byte[81920];
             long totalRead = 0;
@@ -174,90 +175,30 @@ public sealed class UpdateService
             }
         }
 
-        Logger.Info("更新包下载完成，开始解压...");
+        Logger.Info("安装包下载完成，正在启动静默安装...");
         progress?.Report(100);
 
-        // 2. 解压安装包
-        ZipFile.ExtractToDirectory(zipPath, extractDir);
-
-        // 寻找实际包含 TaskbarCalendar.exe 的源目录（防打包时外层包裹文件夹）
-        string sourceDir = extractDir;
-        if (!File.Exists(Path.Combine(sourceDir, "TaskbarCalendar.exe")))
-        {
-            string[] subDirs = Directory.GetDirectories(extractDir);
-            foreach (string sub in subDirs)
-            {
-                if (File.Exists(Path.Combine(sub, "TaskbarCalendar.exe")))
-                {
-                    sourceDir = sub;
-                    break;
-                }
-            }
-        }
-
-        if (!File.Exists(Path.Combine(sourceDir, "TaskbarCalendar.exe")))
-        {
-            throw new FileNotFoundException("更新包中未找到 TaskbarCalendar.exe 可执行文件");
-        }
-
-        // 3. 构建就地替换与重启的批处理脚本
-        int currentPid = Process.GetCurrentProcess().Id;
-        string? targetExePath = Process.GetCurrentProcess().MainModule?.FileName;
-        if (string.IsNullOrWhiteSpace(targetExePath) || !File.Exists(targetExePath) || Path.GetFileName(targetExePath).IndexOf("TaskbarCalendar", StringComparison.OrdinalIgnoreCase) < 0)
-        {
-            targetExePath = Path.Combine(AppContext.BaseDirectory, "TaskbarCalendar.exe");
-        }
-        string appDir = Path.GetDirectoryName(targetExePath) ?? AppContext.BaseDirectory;
-        // 批处理文件置于外层临时目录，避免删除解压临时包时被占用
-        string cmdScriptPath = Path.Combine(Path.GetTempPath(), $"taskbar_update_{currentPid}.cmd");
-
-        var sb = new StringBuilder();
-        sb.AppendLine("@echo off");
-        sb.AppendLine("chcp 65001 >nul");
-        sb.AppendLine($"set \"TARGET_PID={currentPid}\"");
-        sb.AppendLine($"set \"SRC_DIR={sourceDir}\"");
-        sb.AppendLine($"set \"APP_DIR={appDir}\"");
-        sb.AppendLine($"set \"EXE_PATH={targetExePath}\"");
-        sb.AppendLine();
-        sb.AppendLine(":: 循环等待主进程完全退出以释放文件句柄锁定");
-        sb.AppendLine(":WAIT_LOOP");
-        sb.AppendLine("tasklist /fi \"PID eq %TARGET_PID%\" 2>nul | find \"%TARGET_PID%\" >nul");
-        sb.AppendLine("if not errorlevel 1 (");
-        sb.AppendLine("    timeout /t 1 /nobreak >nul");
-        sb.AppendLine("    goto WAIT_LOOP");
-        sb.AppendLine(")");
-        sb.AppendLine();
-        sb.AppendLine(":: 额外等待 500ms 确保所有 dll 句柄释放干净");
-        sb.AppendLine("timeout /t 1 /nobreak >nul");
-        sb.AppendLine();
-        sb.AppendLine(":: 覆盖拷贝新文件到程序目录");
-        sb.AppendLine("xcopy \"%SRC_DIR%\\*\" \"%APP_DIR%\\\" /s /e /y >nul");
-        sb.AppendLine();
-        sb.AppendLine(":: 重新拉起主程序");
-        sb.AppendLine("start \"\" \"%EXE_PATH%\"");
-        sb.AppendLine();
-        sb.AppendLine(":: 清理解压临时包与批处理脚本自身");
-        sb.AppendLine("timeout /t 1 /nobreak >nul");
-        sb.AppendLine($"rd /s /q \"{tempRoot}\" 2>nul");
-        sb.AppendLine("del \"%~f0\" 2>nul");
-
-        File.WriteAllText(cmdScriptPath, sb.ToString(), new UTF8Encoding(false));
-
-        Logger.Info($"更新就绪，拉起更新脚本并退出主程序 (PID: {currentPid})...");
-
-        // 4. 启动后台批处理并优雅退出
+        // 2. 静默拉起安装器完成升级
+        //    /SILENT                 静默安装（不弹交互向导）
+        //    /SUPPRESSMSGBOXES       抑制安装器消息框，避免托盘场景下无窗口提示被阻塞
+        //    /NORESTART              禁止安装器自行重启系统
+        //    /FORCECLOSEAPPLICATIONS 强制结束占用安装目录的本程序进程（托盘程序收到
+        //                            WM_CLOSE 只会隐藏窗体不会退出，必须走强制路径；
+        //                            同时本方法末尾会主动 Shutdown，双保险）
+        //    /RESTARTAPPLICATIONS    安装完成后自动重启被关闭的应用程序
         var startInfo = new ProcessStartInfo
         {
-            FileName = "cmd.exe",
-            Arguments = $"/c \"{cmdScriptPath}\"",
-            CreateNoWindow = true,
-            UseShellExecute = false,
-            WorkingDirectory = Path.GetTempPath(),
+            FileName = setupPath,
+            Arguments = "/SILENT /SUPPRESSMSGBOXES /NORESTART /FORCECLOSEAPPLICATIONS /RESTARTAPPLICATIONS",
+            UseShellExecute = true,
+            WorkingDirectory = tempRoot,
         };
 
         Process.Start(startInfo);
 
-        // UI 线程退出
+        Logger.Info("静默安装器已启动，准备退出主程序...");
+
+        // 3. UI 线程退出：安装器接管后续升级与重启
         if (System.Windows.Application.Current is not null)
         {
             _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>

@@ -7,7 +7,9 @@ publish/
 dist/
 dist-lite/
 *.zip
-!site/download/*.zip
+# 官网交付安装器（.exe）需要纳入 git，其余 exe 忽略
+*.exe
+!site/download/*.exe
 
 # IDE 配置
 .vs/

@@ -19,7 +19,7 @@
 dotnet build TaskbarCalendar.sln -c Debug                 # 构建
 dotnet run --project src\TaskbarCalendar                  # 运行（托盘驻留）
 dotnet run --project src\TaskbarCalendar -- --settings    # 直接打开设置窗口
-powershell -ExecutionPolicy Bypass -File tools\publish.ps1      # 发布轻量版到 publish\
+powershell -ExecutionPolicy Bypass -File tools\publish.ps1      # 发布（产物含 Inno Setup 安装器，需本机装 Inno Setup 6）
 powershell -ExecutionPolicy Bypass -File tools\generate-icon.ps1 # 重新生成 app.ico
 powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1     # 同步官网下载包 + 页面版本号
 powershell -ExecutionPolicy Bypass -File tools\generate-og-image.ps1 # 重新生成 OG 分享卡片
@@ -44,11 +44,11 @@ src/TaskbarCalendar/
 ├─ UI/
 │  ├─ CalendarPopupWindow.* # 日历面板（月历/年月光选择器/详情栏/主题）
 │  ├─ SettingsWindow.*      # 设置窗口
-│  ├─ UpdateWindow.*        # 新版本检查与自动就地更新弹窗
+│  ├─ UpdateWindow.*        # 新版本检查与下载安装器静默升级弹窗
 │  └─ DayCell.cs            # 日期格数据模型（不可变，每次重建）
 ├─ Services/
 │  ├─ AppInfo.cs            # 版本号反射读取与官网地址常量
-│  ├─ UpdateService.cs      # 版本检查、流式下载、解压与后台批处理自覆盖重启
+│  ├─ UpdateService.cs      # 版本检查、流式下载安装器、静默拉起 Inno Setup 升级
 │  ├─ TrayService.cs        # 托盘图标与菜单
 │  ├─ SettingsService.cs    # 设置持久化（单例）+ Changed 事件
 │  ├─ AutoStartService.cs   # HKCU Run 开机自启
@@ -61,6 +61,10 @@ src/TaskbarCalendar/
 ├─ Compat/
 │  └─ Net48Polyfills.cs     # 兼容层：IsExternalInit / required 特性 / MathCompat / KeyValuePair 解构
 └─ GlobalUsings.cs          # 全局 using（导入兼容层命名空间）
+
+installer/                   # Inno Setup 安装器（每用户安装，免 UAC）
+├─ TaskbarCalendar.iss      #   安装/卸载脚本（含 PascalScript 进程检测与注册表清理）
+└─ license.rtf              #   安装向导展示的 MIT 许可协议
 
 site/                       # 官网静态单页（Cloudflare Pages 构建输出目录，无构建步骤）
 ├─ index.html               #   首页：下载入口 / 安装引导 / FAQ
@@ -117,6 +121,8 @@ site/                       # 官网静态单页（Cloudflare Pages 构建输出
 16. **net48 兼容层与 API 红线**：`Compat/Net48Polyfills.cs` 提供 `IsExternalInit`、`RequiredMemberAttribute` 等编译器标记类型（支撑 record / init / required），以及 `MathCompat.Clamp` 与 `KeyValuePair` 解构扩展；业务代码不得直接使用 .NET Core 专有 API —— `Environment.ProcessPath` → `Process.GetCurrentProcess().MainModule?.FileName`、`str.AsSpan(n, len)` → `Substring(n, len)`、`name[..n]` → `Substring(0, n)`、`Math.Clamp` → `MathCompat.Clamp`、`KeyValuePair` 解构依赖兼容层扩展。
 17. **net48 下节假日同步必须显式开启 TLS 1.2**：`App.OnStartup` 中的 `ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12` 不可删除，否则 HTTPS 请求全部失败（表现为节假日自动同步报错）。
 18. **发布包名自 v1.1.0 起不含 `-lite`**：下载包为 `TaskbarCalendar-v{版本}-win-x64.zip`；CI 与本地脚本均不使用 `--self-contained` / `PublishSingleFile`（net48 不支持），产物为 exe + 若干依赖 dll 的目录（约 1.7MB，zip 约 500KB）。
+19. **安装器（Inno Setup）相关**：安装位置默认 `%LOCALAPPDATA%\Programs\TaskbarCalendar`（`PrivilegesRequired=lowest` 免 UAC），该目录用户可写，因此 `UpdateService` 的静默升级无需提权；`[Setup]` 用 `CloseApplications=force` + `CloseApplicationsFilter=TaskbarCalendar.exe`（默认 `yes` 依赖 Restart Manager 发 WM_CLOSE，托盘程序只会隐藏窗体不退出，导致删文件失败）；**不要设 `AppMutex`**：静默安装遇程序在运行时会弹消息框，被 `/SUPPRESSMSGBOXES` 抑制后直接 Abort（exit 1），安装器根本走不到关进程那步；**静默卸载不会自动关进程**（`CloseApplications` 只管安装主流程），卸载器靠 `InitializeUninstall` 里 `taskkill /f /im TaskbarCalendar.exe` + 轮询单实例 Mutex 等待退出——注意 **Pascal Script 不能用 `CreateToolhelp32Snapshot` 手写进程枚举**：Pascal Script 的 Char 是双字节，与 API 的 ANSI 进程名比较永远失配（实测 `isRunning=False` 漏判）；自更新静默参数固定为 `/SILENT /SUPPRESSMSGBOXES /NORESTART /FORCECLOSEAPPLICATIONS /RESTARTAPPLICATIONS`；自动重启依赖程序启动时调用 `RegisterApplicationRestart`（已加在 `App.OnStartup`），否则 `/RESTARTAPPLICATIONS` 装完不重启；安装器编译时版本号与产物目录必须由 PowerShell 以 `/DMyAppVersion=`、`/DSourceDir=` 注入，不要在 ISS 中硬编码 `DistDir`（曾因硬编码 `..\dist` 而打包到过期目录）；`installer/TaskbarCalendar.iss` 与 `installer/Languages/ChineseSimplified.isl` 必须保持 UTF-8 with BOM（中文 .isl 自 Inno 6.4 起不再随分发包附带，从 issrc 仓库单独获取后随仓库提交）；Pascal Script 注释在 `const`/`type` 段必须用 `{}`（`//` 与 `///` 会编译失败），`Exec` 的签名是 `Exec(Filename, Params, WorkingDir, ShowCmd, Wait, var ResultCode)` 六参。
+20. **`UpdateService` 下载的是安装器而非 zip**：`site/version.json` 的 `downloadUrl` 指向 `TaskbarCalendar-v{X.X.X}-win-x64-Setup.exe`；自更新流程为「下载安装器 → `/FORCECLOSEAPPLICATIONS` 静默升级 → 程序先 Shutdown、安装器再强制兜底 → Restart Manager 自动重启」。
 
 ## 测试方式（无单元测试）
 
@@ -134,17 +140,19 @@ site/                       # 官网静态单页（Cloudflare Pages 构建输出
 # 1. 改版本号与变更记录
 #    src\TaskbarCalendar\TaskbarCalendar.csproj 的 <Version>
 #    docs\功能清单.md 变更记录追加一行
-# 2. 同步官网站点（下载包 + 页面版本号 + sitemap 日期）
+# 2. 同步官网站点（构建安装器 + 页面版本号 + sitemap 日期）
+#    依赖本机已安装 Inno Setup 6（未安装会抛错提示）
 powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1
 # 3. 提交推送（site/ 改动推送后由 Cloudflare Pages 自动部署）
 git add -A; git commit -m "feat: ..."; git push
 # 4. 打标签触发自动发版（GitHub Actions: .github/workflows/release.yml）
-git tag v1.0.2; git push origin v1.0.2
+#    CI 会 choco install innosetup 后编译 TaskbarCalendar-v{X.X.X}-win-x64-Setup.exe
+git tag v1.2.0; git push origin v1.2.0
 # 5. 验证（3-5 分钟后）
-gh release view v1.0.2
+gh release view v1.2.0
 ```
 
-工作流会构建 .NET Framework 4.8 版本（用户免安装）、打包 `TaskbarCalendar-v*-win-x64.zip` 并自动发布 Release。
+工作流会构建 .NET Framework 4.8 版本（用户免安装运行时）、编译 Inno Setup 每用户安装器并自动发布 Release。
 
 ## 外部依赖与数据
 

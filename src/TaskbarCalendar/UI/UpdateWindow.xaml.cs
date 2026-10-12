@@ -8,7 +8,7 @@ using MessageBox = System.Windows.MessageBox;
 namespace TaskbarCalendar.UI;
 
 /// <summary>
-/// 新版本更新确认与自动就地替换交互窗口
+/// 新版本更新确认窗口：下载安装器并静默升级
 /// </summary>
 public partial class UpdateWindow : Window
 {
@@ -42,20 +42,20 @@ public partial class UpdateWindow : Window
         CancelButton.IsEnabled = false;
         ProgressPanel.Visibility = Visibility.Visible;
         DownloadBar.Value = 0;
-        StatusText.Text = "正在连接并下载更新包...";
+        StatusText.Text = "正在连接并下载安装包...";
 
         var progress = new Progress<int>(percent =>
         {
             DownloadBar.Value = percent;
             StatusText.Text = percent < 100
-                ? $"正在下载更新包... {percent}%"
-                : "下载完成，正在解压并准备重启...";
+                ? $"正在下载安装包... {percent}%"
+                : "下载完成，正在启动安装器...";
         });
 
         try
         {
             await _updateService.DownloadAndApplyUpdateAsync(_info, progress);
-            // 正常情况下批处理拉起后主程序已执行 Shutdown()
+            // 正常情况下静默安装器拉起后主程序已执行 Shutdown()
         }
         catch (Exception ex)
         {
@@ -66,7 +66,7 @@ public partial class UpdateWindow : Window
             ProgressPanel.Visibility = Visibility.Collapsed;
 
             MessageBox.Show(
-                $"自动更新遇到问题：{ex.Message}\n\n建议您直接前往官网下载最新版本解压覆盖。",
+                $"自动更新遇到问题：{ex.Message}\n\n建议您直接前往官网下载最新版本重新安装。",
                 "更新失败",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);

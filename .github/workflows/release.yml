@@ -20,6 +20,10 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      # 安装 Inno Setup 6 用于编译安装器（choco 预装在 GitHub windows runner 上）
+      - name: Setup Inno Setup
+        run: choco install innosetup --no-progress -y
+
       - name: Build (.NET Framework 4.8, no runtime install required)
         shell: pwsh
         run: |
@@ -29,17 +33,21 @@ jobs:
             -p:DebugType=None -p:DebugSymbols=false `
             -p:Version=$version `
             -o dist
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish 失败" }
+          Copy-Item "docs/使用说明.txt" "dist/使用说明.txt" -Force
 
-      - name: Package zip
+      - name: Build Setup (Inno Setup, per-user, no UAC)
         shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}"
-          Copy-Item "docs/使用说明.txt" "dist/使用说明.txt" -Force
-          Compress-Archive -Path 'dist/*' -DestinationPath "TaskbarCalendar-$tag-win-x64.zip" -Force
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $iscc = "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { $iscc = (Get-Command iscc).Source }
+          & $iscc "/Q" "/DMyAppVersion=$version" "/DSourceDir=$env:GITHUB_WORKSPACE\dist" "/O$env:GITHUB_WORKSPACE" "installer\TaskbarCalendar.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup 编译失败" }
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
-          files: TaskbarCalendar-*-win-x64.zip
+          files: TaskbarCalendar-*-Setup.exe
           generate_release_notes: true
