@@ -1,71 +1,127 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>页面走丢了 · 任务栏日历</title>
   <meta name="robots" content="noindex, nofollow">
+
+  <!-- 主题初始化：必须在样式表之前同步执行，避免浅色系统用户看到深色闪烁 -->
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('theme'); } catch (e) { }
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+    })();
+  </script>
+
+  <!-- 浏览器地址栏配色跟随主题 -->
+  <meta name="theme-color" content="#0e1016" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)">
+
   <link rel="icon" href="/assets/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/css/style.css">
+  <!-- 404 页位于任意深度路径，资源一律用绝对路径 -->
+  <link rel="stylesheet" href="/css/style.css?v1.2.0">
   <style>
     .err-wrap {
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 24px;
+      padding: 40px 24px;
     }
+
     .err-code {
-      font-size: 6rem;
+      font-family: var(--font-display);
+      font-size: clamp(4.5rem, 3rem + 8vw, 6.5rem);
       font-weight: 800;
       line-height: 1;
+      letter-spacing: -0.05em;
       background: var(--accent-gradient);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
     }
+
     .err-title {
-      font-size: 1.6rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.6rem);
       font-weight: 700;
-      margin: 20px 0 10px;
+      letter-spacing: -0.025em;
+      margin: 22px 0 12px;
+      text-wrap: balance;
     }
+
     .err-desc {
       color: var(--text-secondary);
-      margin-bottom: 32px;
-      max-width: 460px;
+      margin-bottom: 34px;
+      max-width: 42ch;
+      font-size: 0.96rem;
+      text-wrap: pretty;
     }
+
     .err-actions {
       display: flex;
       gap: 14px;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: center;
+    }
+
+    /* 底部导航：避免用户困在死胡同 */
+    .err-links {
+      margin-top: 44px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 0.86rem;
+    }
+
+    .err-links a {
+      color: var(--text-muted);
+    }
+
+    .err-links a:hover {
+      color: var(--accent-soft);
+    }
+
+    @media (max-width: 560px) {
+      .err-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 340px;
+      }
+
+      .err-actions .btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <main class="err-wrap">
-    <div class="err-code">404</div>
+    <div class="err-code" aria-hidden="true">404</div>
     <h1 class="err-title">这个日期不在日历里</h1>
     <p class="err-desc">你访问的页面走丢了。不过没关系，回到首页继续使用即可。</p>
     <div class="err-actions">
       <a href="/" class="btn btn-primary">返回首页</a>
-      <a href="/download/TaskbarCalendar-v1.2.0-win-x64-Setup.exe" class="btn btn-secondary" download>直接下载 v1.2.0 安装器（约 2.6 MB，无需 UAC）</a>
+      <a href="/download/TaskbarCalendar-v1.2.0-win-x64-Setup.exe" class="btn btn-secondary" download>直接下载 v1.2.0 安装器（约 2.6 MB）</a>
     </div>
+    <nav class="err-links" aria-label="其他链接">
+      <a href="/#features">功能特性</a>
+      <a href="/#install">安装运行</a>
+      <a href="/#faq">常见问题</a>
+      <a href="https://github.com/IceCoder1994/taskbar-calendar" target="_blank" rel="noopener noreferrer">GitHub 源码</a>
+    </nav>
   </main>
-  <script>
-    (function () {
-      var saved = null;
-      try { saved = localStorage.getItem('theme'); } catch (e) { }
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-    })();
-  </script>
 </body>
 </html>
