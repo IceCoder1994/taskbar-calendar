@@ -132,7 +132,7 @@ export const Main: React.FC = () => {
 
       {/* ============ 背景音乐（全程循环，低音量铺垫） ============ */}
       <Audio
-        src={staticFile('audio/bgm.wav')}
+        src={staticFile('audio/bgm.mp3')}
         volume={(f) => {
           // 开头 20 帧淡入
           const fadeIn = Math.min(1, f / 20);
@@ -144,16 +144,16 @@ export const Main: React.FC = () => {
       />
 
       {/* ============ 音效层 ============ */}
-      <Sfx at={SFX.click1} file="audio/click.wav" volume={0.75} />
-      <Sfx at={SFX.whoosh2} file="audio/whoosh.wav" volume={0.5} />
-      <Sfx at={SFX.chime2} file="audio/chime.wav" volume={0.35} />
-      <Sfx at={SFX.pop3a} file="audio/pop.wav" volume={0.4} />
-      <Sfx at={SFX.pop3b} file="audio/pop.wav" volume={0.4} />
-      <Sfx at={SFX.chime3} file="audio/chime.wav" volume={0.35} />
-      <Sfx at={SFX.pop4a} file="audio/pop.wav" volume={0.45} />
-      <Sfx at={SFX.pop4b} file="audio/pop.wav" volume={0.45} />
-      <Sfx at={SFX.pop4c} file="audio/pop.wav" volume={0.45} />
-      <Sfx at={SFX.chime5} file="audio/chime.wav" volume={0.4} />
+      <Sfx at={SFX.click1} file="audio/click.mp3" volume={0.75} />
+      <Sfx at={SFX.whoosh2} file="audio/whoosh.mp3" volume={0.5} />
+      <Sfx at={SFX.chime2} file="audio/chime.mp3" volume={0.35} />
+      <Sfx at={SFX.pop3a} file="audio/pop.mp3" volume={0.4} />
+      <Sfx at={SFX.pop3b} file="audio/pop.mp3" volume={0.4} />
+      <Sfx at={SFX.chime3} file="audio/chime.mp3" volume={0.35} />
+      <Sfx at={SFX.pop4a} file="audio/pop.mp3" volume={0.45} />
+      <Sfx at={SFX.pop4b} file="audio/pop.mp3" volume={0.45} />
+      <Sfx at={SFX.pop4c} file="audio/pop.mp3" volume={0.45} />
+      <Sfx at={SFX.chime5} file="audio/chime.mp3" volume={0.4} />
     </AbsoluteFill>
   );
 };

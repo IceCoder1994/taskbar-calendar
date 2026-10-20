@@ -55,10 +55,10 @@ promo/
 | 脚本 | 作用 |
 | --- | --- |
 | `python gen_tts.py` | 用 edge-tts 生成 5 段晓晓配音（`public/audio/scene*.mp3`） |
-| `python gen_sfx.py` | 纯波形合成 BGM 与 UI 音效（无版权风险） |
+| `python gen_sfx.py` | 纯波形合成 BGM 与 UI 音效，直接输出 mp3（无版权风险） |
 | `python tools/gen_calendar_data.py` | 依据 `../src/TaskbarCalendar/Data/holidays.json` 生成日历格子数据 |
 
-依赖：`pip install edge-tts mutagen lunardate`
+依赖：`pip install edge-tts mutagen lunardate lameenc`
 
 ## 修改台词 / 时长
 
