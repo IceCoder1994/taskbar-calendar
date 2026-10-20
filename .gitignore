@@ -24,3 +24,8 @@ desktop.ini
 # Python 缓存（tools 下的辅助脚本）
 __pycache__/
 *.pyc
+
+# Remotion 宣传视频工程
+promo/node_modules/
+promo/out/
+

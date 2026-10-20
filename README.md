@@ -93,6 +93,9 @@ powershell -ExecutionPolicy Bypass -File tools\publish.ps1    # 发布（产物�
 官网源码位于 `site/`（纯静态单页，由 Cloudflare Pages 托管，构建输出目录填 `site`）；
 发版前执行 `powershell -ExecutionPolicy Bypass -File tools\sync-site.ps1` 可自动同步站点下载包与页面版本号。
 
+宣传短视频工程位于 `promo/`（Remotion + React，9:16 竖屏 1080×1920 / 60fps，含晓晓 AI 配音），
+详见 [promo/README.md](promo/README.md)。
+
 ## 贡献
 
 欢迎提交 Issue 与 Pull Request！协作流程（Fork + PR）见 [CONTRIBUTING.md](CONTRIBUTING.md)。

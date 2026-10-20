@@ -1,0 +1,22 @@
+{
+  "name": "taskbar-calendar-promo",
+  "version": "1.0.0",
+  "description": "Windows 11 任务栏日历宣传短视频 (Remotion)",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio src/index.tsx",
+    "render": "remotion render src/index.tsx Main out/promo.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.537",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.537"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.9.3"
+  }
+}
